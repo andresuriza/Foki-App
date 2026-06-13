@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Communicating webpage and Arduino</title>
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <h1>Communicating between a webpage and Arduino</h1>
+        <button id="lightOn">Turn light on</button>
+        <button id="lightOff">Turn light off</button>
+
+        <script>
+            var socket = io();
+            document.getElementById('lightOn').onclick = function(){
+                socket.emit('lights', {status:"1"});
+            };
+
+            document.getElementById('lightOff').onclick = function(){
+                socket.emit('lights', {status:"0"});
+            };
+        </script>
+    </body>
+</html>
