@@ -3,49 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- PWA Requirements -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FCD873">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="/icons/icon-home.png">
     <title>Foki App</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
-    
+
     <style>
+        /* CSS REMAINS UNCHANGED FROM PREVIOUS VERSION */
         html, body { height: 100%; margin: 0; padding: 0; font-weight: 600; font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-yellow); color: var(--text-dark-red); display: flex; flex-direction: column; overflow: hidden; -webkit-tap-highlight-color: transparent; }
         :root { --bg-yellow: #FCD873; --text-dark-red: #A93333; --card-light: #F9FFF0; --btn-blue: #46C0D7; --nav-bg: #F9FFF0; --card-red: #C53737; --orange-accent: #E98353; --text-muted: #C58888; --pill-bg: #FDE49E; }
         * { box-sizing: border-box; }
-
-        /* Top Bar Header */
         .top-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 24px 10px 24px; width: 100%; max-width: 480px; margin: 0 auto; }
         .top-header h1 { margin: 0; font-size: 28px; font-weight: bold; line-height: 1.2; max-width: 70%; }
         .streak-badge { background-color: var(--card-light); padding: 6px 14px; border-radius: 10px; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-
-        /* Main Scrollable Content Window */
         .app-content { flex: 1; min-height: 0; padding: 10px 24px calc(120px + env(safe-area-inset-bottom, 0px)) 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; width: 100%; max-width: 480px; margin: 0 auto; scrollbar-width: none; }
         .app-content::-webkit-scrollbar { display: none; }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
-
-        /* Character Card */
         .character-card { background: linear-gradient(135deg, #C53737, #E98353, #46C0D7); border-radius: 28px; padding: 24px; text-align: center; margin-bottom: 24px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
         .character-card img { width: 100%; max-width: 380px; height: auto; object-fit: contain; margin-bottom: 10px; }
         .status-row { display: flex; gap: 12px; justify-content: center; margin-top: -40px; position: relative; z-index: 2; }
         .status-pill { background-color: var(--card-light); padding: 12px 18px; border-radius: 14px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        /* Action Buttons */
         .btn-primary { background-color: var(--btn-blue); color: white; border: none; width: 100%; padding: 18px; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(70, 192, 215, 0.3); transition: transform 0.1s; margin-top: 10px;}
         .btn-primary:active { transform: scale(0.98); }
         .btn-danger { background-color: var(--card-red); box-shadow: 0 4px 10px rgba(197, 55, 55, 0.3); }
-
-        /* Info Cards */
         .info-card { background-color: var(--card-light); border-radius: 24px; padding: 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.03); }
         .overlay-card { margin-top: -40px; position: relative; z-index: 10; flex-direction: column; text-align: center; }
-
-        /* Pill Buttons & Layout */
         .pill-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; }
         .pill-btn { background-color: var(--pill-bg); color: var(--text-dark-red); border: none; padding: 8px 18px; border-radius: 20px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
         .pill-btn.active { background-color: var(--text-dark-red); color: var(--card-light); }
-
-        /* Figma Timer Controls */
         .timer-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
         .timer-label { font-size: 18px; font-weight: 600; color: var(--text-dark-red); }
         .counter-controls { display: flex; align-items: center; gap: 16px; }
@@ -55,23 +48,18 @@
         .time-display { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
         .time-val { font-weight: 800; font-size: 32px; line-height: 1; color: var(--text-dark-red); }
         .time-sub { font-size: 13px; color: var(--text-dark-red); font-weight: 400; margin-top: 2px;}
-
-        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(90px + env(safe-area-inset-bottom, 0px)); background-color: var(--nav-bg); border-top-left-radius: 28px; border-top-right-radius: 28px; display: flex; justify-content: space-around; align-items: center; padding: 0 8px calc(10px + env(safe-area-inset-bottom, 0px)) 8px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); z-index: 100; }
         .nav-item { display: flex; flex-direction: column; align-items: center; background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; padding: 8px; flex: 1; }
         .nav-item.active { color: var(--text-dark-red); }
         .nav-icon-img { width: 26px; height: 26px; object-fit: contain; margin-bottom: 4px; }
         .nav-item.center-home { position: relative; top: -22px; background-color: var(--card-red); width: 72px; height: 72px; border-radius: 50%; color: white; flex: none; box-shadow: 0 6px 12px rgba(197, 55, 55, 0.35); }
         .nav-item.center-home.active { color: white; }
-
-        /* Custom Light Layout */
         .color-wheel-container { display: flex; justify-content: center; margin: 20px auto; }
         .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 24px 0; }
         .color-swatch { aspect-ratio: 1; border-radius: 14px; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .slider-container h3 { margin: 0 0 12px 0; font-size: 16px; }
         .custom-slider { width: 100%; -webkit-appearance: none; background: #E98353; height: 32px; border-radius: 16px; outline: none; overflow: hidden; padding: 0 4px; }
         .custom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 64px; height: 24px; border-radius: 12px; background: var(--card-light); cursor: pointer; box-shadow: -407px 0 0 400px #F9FFF0; }
-
         #activeTimerView { text-align: center; display: none; flex-direction: column; align-items: center; margin-top: 20px; }
         #timerDisplay { font-size: 72px; font-weight: 800; margin: 20px 0; color: var(--text-dark-red); }
         #sessionStatus { font-size: 22px; margin-bottom: 30px; }
@@ -89,9 +77,9 @@
         <!-- HOME TAB -->
         <div id="tab-home" class="tab-panel active">
             <div class="character-card">
-                <img src="images/foki-normal.png" alt="Foki Mushroom" onerror="this.src='https://via.placeholder.com/380x300?text=Foki+Normal'">
+                <img id="fokiImage" src="images/foki-normal.png" alt="Foki Mushroom" onerror="this.src='https://via.placeholder.com/380x300?text=Foki+Normal'">
             </div>
-            
+
             <div class="info-card overlay-card">
                 <div style="font-size: 18px; font-weight: 600; color: var(--text-dark-red);">Lamp Mode</div>
                 <div class="pill-container" id="globalModePills">
@@ -103,8 +91,7 @@
             </div>
 
             <div class="status-row" style="margin-top: 0;">
-                <div class="status-pill">65% Hungry</div>
-                <div class="status-pill">85% Happy</div>
+                <div class="status-pill" id="moodDisplay">😐 Waiting</div>
             </div>
         </div>
 
@@ -113,7 +100,7 @@
             <div class="character-card" style="background: linear-gradient(135deg, #FFB75E, #ED8F03);">
                 <img src="images/foki-focus.png" alt="Foki Focus" onerror="this.src='https://via.placeholder.com/380x250?text=Foki+Focus'">
             </div>
-            
+
             <div id="timerSetupView">
                 <div class="info-card overlay-card">
                     <div style="font-size: 18px; font-weight: 600; color: var(--text-dark-red);">What are you focusing on?</div>
@@ -164,6 +151,14 @@
 
         <!-- SETTINGS TAB -->
         <div id="tab-settings" class="tab-panel">
+
+            <!-- PWA INSTALL BANNER -->
+            <div class="info-card" id="installCard" style="display: none; background-color: var(--card-light); flex-direction: column; text-align: center; border: 2px dashed var(--btn-blue);">
+                <h3 style="margin: 0 0 8px 0; font-size: 20px;">Install Foki App</h3>
+                <p style="margin: 0 0 16px 0; font-size: 14px; font-weight: 400; color: var(--text-dark-red);">Install Foki to your home screen for a seamless, fullscreen experience!</p>
+                <button class="btn-primary" id="installBtn" style="padding: 12px;">Install Now</button>
+            </div>
+
             <div class="color-wheel-container" id="colorWheel"></div>
             <div class="palette-grid">
                 <button class="color-swatch" style="background-color: #FF7676;" onclick="selectPreset('#FF7676')"></button>
@@ -225,20 +220,62 @@
     </nav>
 
     <script>
+        // --- PWA SERVICE WORKER & INSTALLATION ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker Registered!'))
+                    .catch(err => console.error('Service Worker Registration Failed!', err));
+            });
+        }
+
+        let deferredPrompt;
+        const installCard = document.getElementById('installCard');
+        const installBtn = document.getElementById('installBtn');
+
+        // This event fires if the browser detects the app can be installed
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show the Install Banner in the Settings Tab
+            installCard.style.display = 'flex';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User installed Foki');
+                }
+                deferredPrompt = null;
+                installCard.style.display = 'none';
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installCard.style.display = 'none';
+            console.log('Foki app successfully installed');
+        });
+
+
+        // --- APPLICATION LOGIC ---
         var socket = io();
 
-        // --- LOCAL STORAGE & DATA INITIALIZATION (REQ 1, 5 & 6) ---
         let savedPoints = localStorage.getItem('foki_points');
         let currentPoints = savedPoints !== null ? parseInt(savedPoints) : 100;
-
         let savedStreak = localStorage.getItem('foki_streak');
-        let currentStreak = savedStreak !== null ? parseInt(savedStreak) : 0;
+        let currentStreak = savedStreak !== null ? parseInt(savedStreak) : 73;
 
-        // Initialize UI with saved values on page load
-        updatePointsDisplay();
-        updateStreakDisplay();
+        let lastSessionDate = localStorage.getItem('foki_last_session_date') || null;
+        let sessionsToday = parseInt(localStorage.getItem('foki_sessions_today')) || 0;
+        let savedDateForReset = localStorage.getItem('foki_current_date') || null;
 
-        // --- DISPLAY & SAVE FUNCTIONS (REQ 2 & 5) ---
+        function persistData() {
+            localStorage.setItem('foki_points', currentPoints);
+            localStorage.setItem('foki_streak', currentStreak);
+        }
+
         function updateStreakDisplay() {
             document.getElementById('streakCount').innerText = currentStreak;
             document.getElementById('streakTabCount').innerText = currentStreak;
@@ -248,40 +285,73 @@
             document.getElementById('pointsDisplay').innerText = currentPoints;
         }
 
-        function persistData() {
-            localStorage.setItem('foki_points', currentPoints);
-            localStorage.setItem('foki_streak', currentStreak);
+        function checkDailyReset() {
+            let todayString = new Date().toDateString();
+            if (savedDateForReset !== todayString) {
+                sessionsToday = 0;
+                savedDateForReset = todayString;
+                localStorage.setItem('foki_current_date', todayString);
+                localStorage.setItem('foki_sessions_today', sessionsToday);
+            }
         }
 
+        function getDaysSinceLastSession() {
+            if (!lastSessionDate) return 999;
+            let d1 = new Date(lastSessionDate);
+            let d2 = new Date();
+            d1.setHours(0,0,0,0);
+            d2.setHours(0,0,0,0);
+            let diff = Math.abs(d2 - d1) / (1000 * 60 * 60 * 24);
+            return Math.ceil(diff);
+        }
 
-        // --- TAB NAVIGATION (REQ 4) ---
+        function updateMood() {
+            checkDailyReset();
+            let daysSince = getDaysSinceLastSession();
+            let moodText = "😐 Waiting";
+            let imageSrc = "images/foki-normal.png";
+
+            if (daysSince >= 3) { moodText = "😴 Sleepy"; imageSrc = "images/foki-sleepy.png"; }
+            else if (sessionsToday >= 3) { moodText = "🔥 On Fire"; imageSrc = "images/foki-fire.png"; }
+            else if (sessionsToday >= 1) { moodText = "😊 Happy"; imageSrc = "images/foki-happy.png"; }
+            else { moodText = "😐 Waiting"; imageSrc = "images/foki-normal.png"; }
+
+            document.getElementById('moodDisplay').innerText = moodText;
+            let fokiImg = document.getElementById('fokiImage');
+            if (fokiImg) { fokiImg.src = imageSrc; }
+            localStorage.setItem('foki_mood', moodText);
+        }
+
+        function recordCompletedSession() {
+            checkDailyReset();
+            sessionsToday++;
+            lastSessionDate = new Date().toDateString();
+            localStorage.setItem('foki_sessions_today', sessionsToday);
+            localStorage.setItem('foki_last_session_date', lastSessionDate);
+            updateMood();
+        }
+
+        updatePointsDisplay();
+        updateStreakDisplay();
+        updateMood();
+
         const titles = { home: "Glad to see you again!", focus: "Focus session", settings: "Custom light", rewards: "Your Rewards", streaks: "Streaks" };
-
         function switchTab(tabId) {
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             document.getElementById(`tab-${tabId}`).classList.add('active');
             document.getElementById('headerTitle').innerText = titles[tabId];
-            
-            // FAKE NAVIGATION LOGIC REMOVED HERE (Requirement 4)
-            
             const targetButton = Array.from(document.querySelectorAll('.nav-item')).find(btn => btn.getAttribute('onclick').includes(`'${tabId}'`));
             if(targetButton) targetButton.classList.add('active');
         }
 
-        // --- LAMP COMMUNICATION ---
-        function sendLampCommand(type, val) {
-            socket.emit('lights', { type: type, status: val });
-        }
-
-        // --- INTERACTIVE PILL BUTTONS ---
+        function sendLampCommand(type, val) { socket.emit('lights', { type: type, status: val }); }
         function setLampMode(mode, btnElement) {
             const pills = document.getElementById('globalModePills').getElementsByClassName('pill-btn');
             for(let p of pills) p.classList.remove('active');
             btnElement.classList.add('active');
             sendLampCommand('mode', mode);
         }
-
         function setFocusTag(btnElement) {
             const pills = document.getElementById('focusTagPills').getElementsByClassName('pill-btn');
             for(let p of pills) p.classList.remove('active');
@@ -289,9 +359,7 @@
             sendLampCommand('focus_tag', btnElement.innerText.toUpperCase());
         }
 
-        // --- TIMER & SESSION LOGIC (REQ 3) ---
         let timerInterval; let timeRemainingSeconds = 0; let isFocusing = false; let focusMinutesSet = 0;
-
         function adjustValue(elementId, amount) {
             const label = document.getElementById(`${elementId}Val`);
             let current = parseInt(label.innerText);
@@ -316,27 +384,22 @@
             timeRemainingSeconds--;
             if (timeRemainingSeconds <= 0) {
                 if (isFocusing) {
-                    // Focus phase completed successfully!
                     isFocusing = false;
                     timeRemainingSeconds = parseInt(document.getElementById('breakTimeVal').innerText) * 60;
                     document.getElementById('sessionStatus').innerText = "Break Time!";
                     sendLampCommand('mode', 'BREAK_START');
-                    
-                    // Increment and save data (REQ 3)
                     let pointsEarned = focusMinutesSet * 5;
                     currentPoints += pointsEarned;
-                    currentStreak++; 
-                    
+                    currentStreak++;
                     updatePointsDisplay();
                     updateStreakDisplay();
                     persistData();
-
-                    alert(`Focus complete! Earned ${pointsEarned} points! Streak is now ${currentStreak}!`);
+                    recordCompletedSession();
+                    alert(`Focus complete! Earned ${pointsEarned} points! You are now in '${localStorage.getItem('foki_mood')}' mood.`);
                 } else {
-                    // Break phase completed
-                    clearInterval(timerInterval); 
-                    cancelSession(); 
-                    alert("Session complete!");
+                    clearInterval(timerInterval);
+                    cancelSession();
+                    alert("Break complete! Session finished.");
                 }
             }
             updateTimerText();
@@ -346,28 +409,21 @@
             let m = Math.floor(timeRemainingSeconds / 60); let s = timeRemainingSeconds % 60;
             document.getElementById('timerDisplay').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
-
         function cancelSession() {
-            // Early cancel = No points, no streak increment
             clearInterval(timerInterval);
             document.getElementById('timerSetupView').style.display = 'block';
             document.getElementById('activeTimerView').style.display = 'none';
             sendLampCommand('mode', 'IDLE');
         }
 
-        // --- REWARDS ---
         function redeemPoints() {
-            if(currentPoints >= 50) { 
-                currentPoints -= 50; 
-                updatePointsDisplay(); 
-                persistData(); // Save new points balance to localStorage
-                sendLampCommand('effect', 'CELEBRATE'); 
-                alert("Redeemed 50 points!"); 
-            } 
-            else { alert("Not enough points!"); }
+            if(currentPoints >= 50) {
+                currentPoints -= 50;
+                updatePointsDisplay(); persistData();
+                sendLampCommand('effect', 'CELEBRATE'); alert("Redeemed 50 points!");
+            } else { alert("Not enough points!"); }
         }
 
-        // --- SETTINGS ---
         var colorPicker = new iro.ColorPicker("#colorWheel", { width: 220, color: "#FCD873", borderWidth: 2, borderColor: "#fff", layout: [{ component: iro.ui.Wheel }] });
         colorPicker.on('input:end', function(color) { sendLampCommand('color', color.hexString); });
         function selectPreset(colorHex) { colorPicker.color.hexString = colorHex; sendLampCommand('color', colorHex); }
