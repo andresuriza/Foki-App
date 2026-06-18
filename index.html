@@ -4,335 +4,167 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/icons/icon-home.png">
     <title>Foki App</title>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    
     <style>
-	html {
-		height: 100%;
-	}
-
-	body {
-		height: 100%;
-	}
-
-        :root {
-            --bg-yellow: #FCD873;
-            --text-dark-red: #A93333;
-            --card-light: #F9FFF0;
-            --btn-blue: #46C0D7;
-            --nav-bg: #F9FFF0;
-            --card-red: #C53737;
-            --orange-accent: #E98353;
-            --text-muted: #C58888;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-yellow);
-            color: var(--text-dark-red);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow: hidden;
-        }
+        html, body { height: 100%; margin: 0; padding: 0; font-weight: 600; font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-yellow); color: var(--text-dark-red); display: flex; flex-direction: column; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        :root { --bg-yellow: #FCD873; --text-dark-red: #A93333; --card-light: #F9FFF0; --btn-blue: #46C0D7; --nav-bg: #F9FFF0; --card-red: #C53737; --orange-accent: #E98353; --text-muted: #C58888; --pill-bg: #FDE49E; }
+        * { box-sizing: border-box; }
 
         /* Top Bar Header */
-        .top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 24px 24px 10px 24px;
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        .top-header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: bold;
-            line-height: 1.2;
-            max-width: 70%;
-        }
-
-        .streak-badge {
-            background-color: var(--card-light);
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
+        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 24px 10px 24px; width: 100%; max-width: 480px; margin: 0 auto; }
+        .top-header h1 { margin: 0; font-size: 28px; font-weight: bold; line-height: 1.2; max-width: 70%; }
+        .streak-badge { background-color: var(--card-light); padding: 6px 14px; border-radius: 10px; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 
         /* Main Scrollable Content Window */
-        .app-content {
-		flex: 1;
-		min-height: 0;    /* ← the critical fix, lets flex child actually scroll */
-		padding: 10px 24px calc(120px + env(safe-area-inset-bottom, 0px)) 24px;
-		overflow-y: auto;
-		-webkit-overflow-scrolling: touch;
-		width: 100%;
-		max-width: 480px;
-		margin: 0 auto;
-		scrollbar-width: none;
-        }
+        .app-content { flex: 1; min-height: 0; padding: 10px 24px calc(120px + env(safe-area-inset-bottom, 0px)) 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; width: 100%; max-width: 480px; margin: 0 auto; scrollbar-width: none; }
         .app-content::-webkit-scrollbar { display: none; }
-
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        /* Character Canvas Container */
-        .character-card {
-            background: linear-gradient(135deg, #C53737, #E98353, #46C0D7);
-            border-radius: 28px;
-            padding: 24px;
-            text-align: center;
-            margin-bottom: 24px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .character-card img {
-		width: 85%;
-		max-width: 280px;
-		height: auto;
-		object-fit: contain;
-		margin-bottom: 10px;
-	}
-
-        .status-row {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-top: 15px;
-        }
-
-        .status-pill {
-            background-color: var(--card-light);
-            padding: 12px 18px;
-            border-radius: 14px;
-            font-weight: bold;
-            font-size: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+        /* Character Card */
+        .character-card { background: linear-gradient(135deg, #C53737, #E98353, #46C0D7); border-radius: 28px; padding: 24px; text-align: center; margin-bottom: 24px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
+        .character-card img { width: 100%; max-width: 380px; height: auto; object-fit: contain; margin-bottom: 10px; }
+        .status-row { display: flex; gap: 12px; justify-content: center; margin-top: -40px; position: relative; z-index: 2; }
+        .status-pill { background-color: var(--card-light); padding: 12px 18px; border-radius: 14px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         /* Action Buttons */
-        .btn-primary {
-            background-color: var(--btn-blue);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 18px;
-            border-radius: 16px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(70, 192, 215, 0.3);
-            transition: transform 0.1s;
-        }
+        .btn-primary { background-color: var(--btn-blue); color: white; border: none; width: 100%; padding: 18px; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(70, 192, 215, 0.3); transition: transform 0.1s; margin-top: 10px;}
         .btn-primary:active { transform: scale(0.98); }
+        .btn-danger { background-color: var(--card-red); box-shadow: 0 4px 10px rgba(197, 55, 55, 0.3); }
 
-        /* Custom Light & Interface Grid Controls */
-        .color-wheel-container {
-            width: 240px;
-            height: 240px;
-            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
-            border-radius: 50%;
-            margin: 20px auto;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
+        /* Info Cards */
+        .info-card { background-color: var(--card-light); border-radius: 24px; padding: 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.03); }
+        .overlay-card { margin-top: -40px; position: relative; z-index: 10; flex-direction: column; text-align: center; }
 
-        .palette-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            margin: 24px 0;
-        }
+        /* Pill Buttons & Layout */
+        .pill-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; }
+        .pill-btn { background-color: var(--pill-bg); color: var(--text-dark-red); border: none; padding: 8px 18px; border-radius: 20px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .pill-btn.active { background-color: var(--text-dark-red); color: var(--card-light); }
 
-        .color-swatch {
-            aspect-ratio: 1;
-            border-radius: 14px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+        /* Figma Timer Controls */
+        .timer-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .timer-label { font-size: 18px; font-weight: 600; color: var(--text-dark-red); }
+        .counter-controls { display: flex; align-items: center; gap: 16px; }
+        .counter-btn { background-color: var(--pill-bg); border: none; width: 38px; height: 28px; border-radius: 14px; font-weight: bold; font-size: 20px; color: var(--card-light); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .counter-btn.plus { background-color: var(--bg-yellow); color: white;}
+        .counter-btn.minus { background-color: var(--bg-yellow); color: white;}
+        .time-display { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+        .time-val { font-weight: 800; font-size: 32px; line-height: 1; color: var(--text-dark-red); }
+        .time-sub { font-size: 13px; color: var(--text-dark-red); font-weight: 400; margin-top: 2px;}
 
-        /* Focus & Card Elements */
-        .info-card {
-            background-color: var(--card-light);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.03);
-        }
-
-        .counter-controls {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .counter-btn {
-            background-color: #FCD873;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 20px;
-            color: var(--text-dark-red);
-            cursor: pointer;
-        }
-
-        /* Style Range Sliders */
-        .slider-container h3 { margin: 0 0 12px 0; font-size: 16px; }
-        .custom-slider {
-            width: 100%;
-            -webkit-appearance: none;
-            background: #E98353;
-            height: 32px;
-            border-radius: 16px;
-            outline: none;
-            overflow: hidden;
-            padding: 0 4px;
-        }
-
-        .custom-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 64px;
-            height: 24px;
-            border-radius: 12px;
-            background: var(--card-light);
-            cursor: pointer;
-            box-shadow: -407px 0 0 400px #F9FFF0;
-        }
-
-        /* Bottom Menu Navigation Bar Styling */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: height: calc(90px + env(safe-area-inset-bottom, 0px));
-            background-color: var(--nav-bg);
-            border-top-left-radius: 28px;
-            border-top-right-radius: 28px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: padding: 0 8px calc(10px + env(safe-area-inset-bottom, 0px)) 8px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 8px;
-            flex: 1;
-        }
-
-        .nav-item.active {
-            color: var(--text-dark-red);
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-
-	.nav-icon-img {
-	    width: 26px;
-	    height: 26px;
-	    object-fit: contain;
-	    margin-bottom: 4px;
-	}
-
-        /* Custom Popping Out Middle Menu Item */
-        .nav-item.center-home {
-            position: relative;
-            top: -22px;
-            background-color: var(--card-red);
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            color: white;
-            flex: none;
-            box-shadow: 0 6px 12px rgba(197, 55, 55, 0.35);
-        }
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(90px + env(safe-area-inset-bottom, 0px)); background-color: var(--nav-bg); border-top-left-radius: 28px; border-top-right-radius: 28px; display: flex; justify-content: space-around; align-items: center; padding: 0 8px calc(10px + env(safe-area-inset-bottom, 0px)) 8px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; padding: 8px; flex: 1; }
+        .nav-item.active { color: var(--text-dark-red); }
+        .nav-icon-img { width: 26px; height: 26px; object-fit: contain; margin-bottom: 4px; }
+        .nav-item.center-home { position: relative; top: -22px; background-color: var(--card-red); width: 72px; height: 72px; border-radius: 50%; color: white; flex: none; box-shadow: 0 6px 12px rgba(197, 55, 55, 0.35); }
         .nav-item.center-home.active { color: white; }
+
+        /* Custom Light Layout */
+        .color-wheel-container { display: flex; justify-content: center; margin: 20px auto; }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 24px 0; }
+        .color-swatch { aspect-ratio: 1; border-radius: 14px; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .slider-container h3 { margin: 0 0 12px 0; font-size: 16px; }
+        .custom-slider { width: 100%; -webkit-appearance: none; background: #E98353; height: 32px; border-radius: 16px; outline: none; overflow: hidden; padding: 0 4px; }
+        .custom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 64px; height: 24px; border-radius: 12px; background: var(--card-light); cursor: pointer; box-shadow: -407px 0 0 400px #F9FFF0; }
+
+        #activeTimerView { text-align: center; display: none; flex-direction: column; align-items: center; margin-top: 20px; }
+        #timerDisplay { font-size: 72px; font-weight: 800; margin: 20px 0; color: var(--text-dark-red); }
+        #sessionStatus { font-size: 22px; margin-bottom: 30px; }
     </style>
 </head>
 <body>
 
     <div class="top-header">
         <h1 id="headerTitle">Glad to see you again!</h1>
-        <div class="streak-badge">🔥 <span id="streakCount">73</span></div>
+        <div class="streak-badge">🔥 <span id="streakCount">0</span></div>
     </div>
 
     <div class="app-content">
 
+        <!-- HOME TAB -->
         <div id="tab-home" class="tab-panel active">
             <div class="character-card">
-                <img src="images/foki-normal.png" alt="Foki Mushroom">
-                <div class="status-row">
-                    <div class="status-pill">65% Hungry</div>
-                    <div class="status-pill">85% Happy</div>
-                </div>
-            </div>
-            <button class="btn-primary" onclick="switchTab('focus')">Start focus session</button>
-        </div>
-
-        <div id="tab-focus" class="tab-panel">
-            <div class="character-card" style="background: linear-gradient(135deg, #ee9ca7, #ffdde1);">
-                <img src="images/foki-focus.png" alt="Foki Focus">
-                <div style="color: white; font-weight: bold; font-size: 18px;">What are you focusing on?</div>
+                <img src="images/foki-normal.png" alt="Foki Mushroom" onerror="this.src='https://via.placeholder.com/380x300?text=Foki+Normal'">
             </div>
             
-            <div class="info-card">
-                <span>Focus time</span>
-                <div class="counter-controls">
-                    <button class="counter-btn" onclick="adjustValue('focusTime', -5)">-</button>
-                    <span id="focusTimeVal" style="font-weight: bold; font-size: 22px;">30</span> Min
-                    <button class="counter-btn" onclick="adjustValue('focusTime', 5)">+</button>
+            <div class="info-card overlay-card">
+                <div style="font-size: 18px; font-weight: 600; color: var(--text-dark-red);">Lamp Mode</div>
+                <div class="pill-container" id="globalModePills">
+                    <button class="pill-btn" onclick="setLampMode('CALM', this)">Calm</button>
+                    <button class="pill-btn active" onclick="setLampMode('FOCUS', this)">Focus</button>
+                    <button class="pill-btn" onclick="setLampMode('SENSORY', this)">Sensory</button>
+                    <button class="pill-btn" onclick="switchTab('settings')">Custom</button>
                 </div>
             </div>
 
-            <div class="info-card">
-                <span>Break time</span>
-                <div class="counter-controls">
-                    <button class="counter-btn" onclick="adjustValue('breakTime', -1)">-</button>
-                    <span id="breakTimeVal" style="font-weight: bold; font-size: 22px;">5</span> Min
-                    <button class="counter-btn" onclick="adjustValue('breakTime', 1)">+</button>
-                </div>
+            <div class="status-row" style="margin-top: 0;">
+                <div class="status-pill">65% Hungry</div>
+                <div class="status-pill">85% Happy</div>
             </div>
-            <button class="btn-primary" onclick="sendLampCommand('timer', 'START')">Start Session</button>
         </div>
 
+        <!-- FOCUS TAB -->
+        <div id="tab-focus" class="tab-panel">
+            <div class="character-card" style="background: linear-gradient(135deg, #FFB75E, #ED8F03);">
+                <img src="images/foki-focus.png" alt="Foki Focus" onerror="this.src='https://via.placeholder.com/380x250?text=Foki+Focus'">
+            </div>
+            
+            <div id="timerSetupView">
+                <div class="info-card overlay-card">
+                    <div style="font-size: 18px; font-weight: 600; color: var(--text-dark-red);">What are you focusing on?</div>
+                    <div class="pill-container" id="focusTagPills">
+                        <button class="pill-btn active" onclick="setFocusTag(this)">Study</button>
+                        <button class="pill-btn" onclick="setFocusTag(this)">Creative</button>
+                        <button class="pill-btn" onclick="setFocusTag(this)">Work</button>
+                    </div>
+                    <div style="margin-top: 12px; color: var(--bg-yellow); font-size: 28px; cursor: pointer; font-weight: 800;">⊕</div>
+                </div>
+
+                <div class="info-card">
+                    <div class="timer-row">
+                        <span class="timer-label">Focus time</span>
+                        <div class="counter-controls">
+                            <button class="counter-btn plus" onclick="adjustValue('focusTime', 5)">+</button>
+                            <div class="time-display">
+                                <span id="focusTimeVal" class="time-val">30</span>
+                                <span class="time-sub">Minutes</span>
+                            </div>
+                            <button class="counter-btn minus" onclick="adjustValue('focusTime', -5)">−</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="timer-row">
+                        <span class="timer-label">Break time</span>
+                        <div class="counter-controls">
+                            <button class="counter-btn plus" onclick="adjustValue('breakTime', 1)">+</button>
+                            <div class="time-display">
+                                <span id="breakTimeVal" class="time-val">5</span>
+                                <span class="time-sub">Minutes</span>
+                            </div>
+                            <button class="counter-btn minus" onclick="adjustValue('breakTime', -1)">−</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="startSession()">Start Session</button>
+            </div>
+
+            <div id="activeTimerView">
+                <div id="sessionStatus">Focusing hard!</div>
+                <div id="timerDisplay">30:00</div>
+                <button class="btn-primary btn-danger" onclick="cancelSession()">End Session</button>
+            </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
         <div id="tab-settings" class="tab-panel">
             <div class="color-wheel-container" id="colorWheel"></div>
-            
             <div class="palette-grid">
                 <button class="color-swatch" style="background-color: #FF7676;" onclick="selectPreset('#FF7676')"></button>
                 <button class="color-swatch" style="background-color: #38B6FF;" onclick="selectPreset('#38B6FF')"></button>
@@ -340,105 +172,210 @@
                 <button class="color-swatch" style="background-color: #B576FF;" onclick="selectPreset('#B576FF')"></button>
                 <button class="color-swatch" style="background-color: #FF388B;" onclick="selectPreset('#FF388B')"></button>
             </div>
-
             <div class="slider-container">
                 <h3>Light Intensity: <span id="intensityVal">44%</span></h3>
                 <input type="range" min="0" max="100" value="44" class="custom-slider" id="intensitySlider">
             </div>
         </div>
 
+        <!-- REWARDS TAB -->
         <div id="tab-rewards" class="tab-panel">
             <div class="character-card" style="background: #C53737;">
-                <img src="images/foki-stars.png" alt="Foki Rewards">
+                <img src="images/foki-stars.png" alt="Foki Rewards" onerror="this.src='https://via.placeholder.com/380x200?text=Foki+Rewards'">
             </div>
             <div class="info-card" style="background-color: var(--card-light); flex-direction: column; padding: 24px; text-align: center;">
                 <span style="font-size: 16px; font-weight: bold;">Points to Redeem</span>
-                <h2 style="font-size: 54px; margin: 12px 0; font-weight: 800;">100</h2>
-                <button class="btn-primary" style="background-color: var(--orange-accent); box-shadow: none;">Redeem my points</button>
+                <h2 id="pointsDisplay" style="font-size: 54px; margin: 12px 0; font-weight: 800;">0</h2>
+                <button class="btn-primary" style="background-color: var(--orange-accent); box-shadow: none;" onclick="redeemPoints()">Spend 50 points</button>
             </div>
         </div>
 
+        <!-- STREAKS TAB -->
         <div id="tab-streaks" class="tab-panel">
             <div class="info-card" style="flex-direction: column; text-align: center; padding: 30px 20px;">
-                <h3 style="margin-top: 0; font-size: 22px;">June Streaks</h3>
-                <p style="font-size: 16px; line-height: 1.5;">You have <strong>21 streak days</strong> this month, you got this!</p>
+                <h3 style="margin-top: 0; font-size: 22px;">Current Streaks</h3>
+                <p style="font-size: 16px; line-height: 1.5;">You have completed <strong id="streakTabCount">0</strong> focus sessions, you got this!</p>
             </div>
         </div>
 
     </div>
 
-	<nav class="bottom-nav">
-	    <button class="nav-item" onclick="switchTab('settings')">
-	        <img class="nav-icon-img" src="icons/icon-settings.png" alt="Settings">
-	        <div>Settings</div>
-	    </button>
-	    <button class="nav-item" onclick="switchTab('focus')">
-	        <img class="nav-icon-img" src="icons/icon-focus.png" alt="Focus">
-	        <div>Focus</div>
-	    </button>
-	    <button class="nav-item center-home active" onclick="switchTab('home')">
-	        <img class="nav-icon-img" src="icons/icon-home.png" alt="Home" style="width:44px;height:44px;object-fit:contain;">
-	        <div>Home</div>
-	    </button>
-	    <button class="nav-item" onclick="switchTab('rewards')">
-	        <img class="nav-icon-img" src="icons/icon-rewards.png" alt="Rewards">
-	        <div>Rewards</div>
-	    </button>
-	    <button class="nav-item" onclick="switchTab('streaks')">
-	        <img class="nav-icon-img" src="icons/icon-streaks.png" alt="Streaks">
-	        <div>Streaks</div>
-	    </button>
-	</nav>
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <button class="nav-item" onclick="switchTab('settings')">
+            <img class="nav-icon-img" src="icons/icon-settings.png" alt="Settings" onerror="this.style.display='none'">
+            <div>Settings</div>
+        </button>
+        <button class="nav-item" onclick="switchTab('focus')">
+            <img class="nav-icon-img" src="icons/icon-focus.png" alt="Focus" onerror="this.style.display='none'">
+            <div>Focus</div>
+        </button>
+        <button class="nav-item center-home active" onclick="switchTab('home')">
+            <img class="nav-icon-img" src="icons/icon-home.png" alt="Home" style="width:44px;height:44px;object-fit:contain;" onerror="this.style.display='none'">
+            <div>Home</div>
+        </button>
+        <button class="nav-item" onclick="switchTab('rewards')">
+            <img class="nav-icon-img" src="icons/icon-rewards.png" alt="Rewards" onerror="this.style.display='none'">
+            <div>Rewards</div>
+        </button>
+        <button class="nav-item" onclick="switchTab('streaks')">
+            <img class="nav-icon-img" src="icons/icon-streaks.png" alt="Streaks" onerror="this.style.display='none'">
+            <div>Streaks</div>
+        </button>
+    </nav>
 
     <script>
         var socket = io();
 
-        const titles = {
-            home: "Glad to see you again!",
-            focus: "Focus session",
-            settings: "Custom light",
-            rewards: "Your Rewards",
-            streaks: "Streaks"
-        };
+        // --- LOCAL STORAGE & DATA INITIALIZATION (REQ 1, 5 & 6) ---
+        let savedPoints = localStorage.getItem('foki_points');
+        let currentPoints = savedPoints !== null ? parseInt(savedPoints) : 100;
+
+        let savedStreak = localStorage.getItem('foki_streak');
+        let currentStreak = savedStreak !== null ? parseInt(savedStreak) : 0;
+
+        // Initialize UI with saved values on page load
+        updatePointsDisplay();
+        updateStreakDisplay();
+
+        // --- DISPLAY & SAVE FUNCTIONS (REQ 2 & 5) ---
+        function updateStreakDisplay() {
+            document.getElementById('streakCount').innerText = currentStreak;
+            document.getElementById('streakTabCount').innerText = currentStreak;
+        }
+
+        function updatePointsDisplay() {
+            document.getElementById('pointsDisplay').innerText = currentPoints;
+        }
+
+        function persistData() {
+            localStorage.setItem('foki_points', currentPoints);
+            localStorage.setItem('foki_streak', currentStreak);
+        }
+
+
+        // --- TAB NAVIGATION (REQ 4) ---
+        const titles = { home: "Glad to see you again!", focus: "Focus session", settings: "Custom light", rewards: "Your Rewards", streaks: "Streaks" };
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            
             document.getElementById(`tab-${tabId}`).classList.add('active');
             document.getElementById('headerTitle').innerText = titles[tabId];
-
-            // Match dynamic streak changes shown on your screenshot variations
-            document.getElementById('streakCount').innerText = (tabId === 'home') ? "73" : "74";
-
-            const targetButton = Array.from(document.querySelectorAll('.nav-item')).find(btn => 
-                btn.getAttribute('onclick').includes(`'${tabId}'`)
-            );
+            
+            // FAKE NAVIGATION LOGIC REMOVED HERE (Requirement 4)
+            
+            const targetButton = Array.from(document.querySelectorAll('.nav-item')).find(btn => btn.getAttribute('onclick').includes(`'${tabId}'`));
             if(targetButton) targetButton.classList.add('active');
         }
+
+        // --- LAMP COMMUNICATION ---
+        function sendLampCommand(type, val) {
+            socket.emit('lights', { type: type, status: val });
+        }
+
+        // --- INTERACTIVE PILL BUTTONS ---
+        function setLampMode(mode, btnElement) {
+            const pills = document.getElementById('globalModePills').getElementsByClassName('pill-btn');
+            for(let p of pills) p.classList.remove('active');
+            btnElement.classList.add('active');
+            sendLampCommand('mode', mode);
+        }
+
+        function setFocusTag(btnElement) {
+            const pills = document.getElementById('focusTagPills').getElementsByClassName('pill-btn');
+            for(let p of pills) p.classList.remove('active');
+            btnElement.classList.add('active');
+            sendLampCommand('focus_tag', btnElement.innerText.toUpperCase());
+        }
+
+        // --- TIMER & SESSION LOGIC (REQ 3) ---
+        let timerInterval; let timeRemainingSeconds = 0; let isFocusing = false; let focusMinutesSet = 0;
 
         function adjustValue(elementId, amount) {
             const label = document.getElementById(`${elementId}Val`);
             let current = parseInt(label.innerText);
             current += amount;
-            if(current < 0) current = 0;
+            if(current < 1) current = 1;
             label.innerText = current;
         }
 
+        function startSession() {
+            focusMinutesSet = parseInt(document.getElementById('focusTimeVal').innerText);
+            timeRemainingSeconds = focusMinutesSet * 60;
+            isFocusing = true;
+            document.getElementById('timerSetupView').style.display = 'none';
+            document.getElementById('activeTimerView').style.display = 'flex';
+            document.getElementById('sessionStatus').innerText = "Focusing hard!";
+            sendLampCommand('mode', 'FOCUS_START');
+            updateTimerText();
+            timerInterval = setInterval(timerTick, 1000);
+        }
+
+        function timerTick() {
+            timeRemainingSeconds--;
+            if (timeRemainingSeconds <= 0) {
+                if (isFocusing) {
+                    // Focus phase completed successfully!
+                    isFocusing = false;
+                    timeRemainingSeconds = parseInt(document.getElementById('breakTimeVal').innerText) * 60;
+                    document.getElementById('sessionStatus').innerText = "Break Time!";
+                    sendLampCommand('mode', 'BREAK_START');
+                    
+                    // Increment and save data (REQ 3)
+                    let pointsEarned = focusMinutesSet * 5;
+                    currentPoints += pointsEarned;
+                    currentStreak++; 
+                    
+                    updatePointsDisplay();
+                    updateStreakDisplay();
+                    persistData();
+
+                    alert(`Focus complete! Earned ${pointsEarned} points! Streak is now ${currentStreak}!`);
+                } else {
+                    // Break phase completed
+                    clearInterval(timerInterval); 
+                    cancelSession(); 
+                    alert("Session complete!");
+                }
+            }
+            updateTimerText();
+        }
+
+        function updateTimerText() {
+            let m = Math.floor(timeRemainingSeconds / 60); let s = timeRemainingSeconds % 60;
+            document.getElementById('timerDisplay').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function cancelSession() {
+            // Early cancel = No points, no streak increment
+            clearInterval(timerInterval);
+            document.getElementById('timerSetupView').style.display = 'block';
+            document.getElementById('activeTimerView').style.display = 'none';
+            sendLampCommand('mode', 'IDLE');
+        }
+
+        // --- REWARDS ---
+        function redeemPoints() {
+            if(currentPoints >= 50) { 
+                currentPoints -= 50; 
+                updatePointsDisplay(); 
+                persistData(); // Save new points balance to localStorage
+                sendLampCommand('effect', 'CELEBRATE'); 
+                alert("Redeemed 50 points!"); 
+            } 
+            else { alert("Not enough points!"); }
+        }
+
+        // --- SETTINGS ---
+        var colorPicker = new iro.ColorPicker("#colorWheel", { width: 220, color: "#FCD873", borderWidth: 2, borderColor: "#fff", layout: [{ component: iro.ui.Wheel }] });
+        colorPicker.on('input:end', function(color) { sendLampCommand('color', color.hexString); });
+        function selectPreset(colorHex) { colorPicker.color.hexString = colorHex; sendLampCommand('color', colorHex); }
+
         const slider = document.getElementById('intensitySlider');
         if(slider) {
-            slider.oninput = function() {
-                document.getElementById('intensityVal').innerText = this.value + "%";
-                sendLampCommand('brightness', this.value);
-            }
-        }
-
-        function selectPreset(colorHex) {
-            sendLampCommand('color', colorHex);
-        }
-
-        function sendLampCommand(type, val) {
-            socket.emit('lights', { type: type, status: val });
+            slider.oninput = function() { document.getElementById('intensityVal').innerText = this.value + "%"; }
+            slider.onchange = function() { sendLampCommand('brightness', this.value); }
         }
     </script>
 </body>
