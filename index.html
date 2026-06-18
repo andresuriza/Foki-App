@@ -1,23 +1,445 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Communicating webpage and Arduino</title>
-        <script src="/socket.io/socket.io.js"></script>
-    </head>
-    <body>
-        <h1>Communicating between a webpage and Arduino</h1>
-        <button id="lightOn">Turn light on</button>
-        <button id="lightOff">Turn light off</button>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>Foki App</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+	html {
+		height: 100%;
+	}
 
-        <script>
-            var socket = io();
-            document.getElementById('lightOn').onclick = function(){
-                socket.emit('lights', {status:"1"});
-            };
+	body {
+		height: 100%;
+	}
 
-            document.getElementById('lightOff').onclick = function(){
-                socket.emit('lights', {status:"0"});
-            };
-        </script>
-    </body>
+        :root {
+            --bg-yellow: #FCD873;
+            --text-dark-red: #A93333;
+            --card-light: #F9FFF0;
+            --btn-blue: #46C0D7;
+            --nav-bg: #F9FFF0;
+            --card-red: #C53737;
+            --orange-accent: #E98353;
+            --text-muted: #C58888;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-yellow);
+            color: var(--text-dark-red);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 24px 10px 24px;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .top-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1.2;
+            max-width: 70%;
+        }
+
+        .streak-badge {
+            background-color: var(--card-light);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* Main Scrollable Content Window */
+        .app-content {
+		flex: 1;
+		min-height: 0;    /* ← the critical fix, lets flex child actually scroll */
+		padding: 10px 24px calc(120px + env(safe-area-inset-bottom, 0px)) 24px;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		width: 100%;
+		max-width: 480px;
+		margin: 0 auto;
+		scrollbar-width: none;
+        }
+        .app-content::-webkit-scrollbar { display: none; }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Character Canvas Container */
+        .character-card {
+            background: linear-gradient(135deg, #C53737, #E98353, #46C0D7);
+            border-radius: 28px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .character-card img {
+		width: 85%;
+		max-width: 280px;
+		height: auto;
+		object-fit: contain;
+		margin-bottom: 10px;
+	}
+
+        .status-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .status-pill {
+            background-color: var(--card-light);
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Action Buttons */
+        .btn-primary {
+            background-color: var(--btn-blue);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(70, 192, 215, 0.3);
+            transition: transform 0.1s;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Custom Light & Interface Grid Controls */
+        .color-wheel-container {
+            width: 240px;
+            height: 240px;
+            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+            border-radius: 50%;
+            margin: 20px auto;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .color-swatch {
+            aspect-ratio: 1;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Focus & Card Elements */
+        .info-card {
+            background-color: var(--card-light);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.03);
+        }
+
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .counter-btn {
+            background-color: #FCD873;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 20px;
+            color: var(--text-dark-red);
+            cursor: pointer;
+        }
+
+        /* Style Range Sliders */
+        .slider-container h3 { margin: 0 0 12px 0; font-size: 16px; }
+        .custom-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            background: #E98353;
+            height: 32px;
+            border-radius: 16px;
+            outline: none;
+            overflow: hidden;
+            padding: 0 4px;
+        }
+
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 64px;
+            height: 24px;
+            border-radius: 12px;
+            background: var(--card-light);
+            cursor: pointer;
+            box-shadow: -407px 0 0 400px #F9FFF0;
+        }
+
+        /* Bottom Menu Navigation Bar Styling */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: height: calc(90px + env(safe-area-inset-bottom, 0px));
+            background-color: var(--nav-bg);
+            border-top-left-radius: 28px;
+            border-top-right-radius: 28px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: padding: 0 8px calc(10px + env(safe-area-inset-bottom, 0px)) 8px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: var(--text-dark-red);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+	.nav-icon-img {
+	    width: 26px;
+	    height: 26px;
+	    object-fit: contain;
+	    margin-bottom: 4px;
+	}
+
+        /* Custom Popping Out Middle Menu Item */
+        .nav-item.center-home {
+            position: relative;
+            top: -22px;
+            background-color: var(--card-red);
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            color: white;
+            flex: none;
+            box-shadow: 0 6px 12px rgba(197, 55, 55, 0.35);
+        }
+        .nav-item.center-home.active { color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="top-header">
+        <h1 id="headerTitle">Glad to see you again!</h1>
+        <div class="streak-badge">🔥 <span id="streakCount">73</span></div>
+    </div>
+
+    <div class="app-content">
+
+        <div id="tab-home" class="tab-panel active">
+            <div class="character-card">
+                <img src="images/foki-normal.png" alt="Foki Mushroom">
+                <div class="status-row">
+                    <div class="status-pill">65% Hungry</div>
+                    <div class="status-pill">85% Happy</div>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="switchTab('focus')">Start focus session</button>
+        </div>
+
+        <div id="tab-focus" class="tab-panel">
+            <div class="character-card" style="background: linear-gradient(135deg, #ee9ca7, #ffdde1);">
+                <img src="images/foki-focus.png" alt="Foki Focus">
+                <div style="color: white; font-weight: bold; font-size: 18px;">What are you focusing on?</div>
+            </div>
+            
+            <div class="info-card">
+                <span>Focus time</span>
+                <div class="counter-controls">
+                    <button class="counter-btn" onclick="adjustValue('focusTime', -5)">-</button>
+                    <span id="focusTimeVal" style="font-weight: bold; font-size: 22px;">30</span> Min
+                    <button class="counter-btn" onclick="adjustValue('focusTime', 5)">+</button>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <span>Break time</span>
+                <div class="counter-controls">
+                    <button class="counter-btn" onclick="adjustValue('breakTime', -1)">-</button>
+                    <span id="breakTimeVal" style="font-weight: bold; font-size: 22px;">5</span> Min
+                    <button class="counter-btn" onclick="adjustValue('breakTime', 1)">+</button>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="sendLampCommand('timer', 'START')">Start Session</button>
+        </div>
+
+        <div id="tab-settings" class="tab-panel">
+            <div class="color-wheel-container" id="colorWheel"></div>
+            
+            <div class="palette-grid">
+                <button class="color-swatch" style="background-color: #FF7676;" onclick="selectPreset('#FF7676')"></button>
+                <button class="color-swatch" style="background-color: #38B6FF;" onclick="selectPreset('#38B6FF')"></button>
+                <button class="color-swatch" style="background-color: #1371FF;" onclick="selectPreset('#1371FF')"></button>
+                <button class="color-swatch" style="background-color: #B576FF;" onclick="selectPreset('#B576FF')"></button>
+                <button class="color-swatch" style="background-color: #FF388B;" onclick="selectPreset('#FF388B')"></button>
+            </div>
+
+            <div class="slider-container">
+                <h3>Light Intensity: <span id="intensityVal">44%</span></h3>
+                <input type="range" min="0" max="100" value="44" class="custom-slider" id="intensitySlider">
+            </div>
+        </div>
+
+        <div id="tab-rewards" class="tab-panel">
+            <div class="character-card" style="background: #C53737;">
+                <img src="images/foki-stars.png" alt="Foki Rewards">
+            </div>
+            <div class="info-card" style="background-color: var(--card-light); flex-direction: column; padding: 24px; text-align: center;">
+                <span style="font-size: 16px; font-weight: bold;">Points to Redeem</span>
+                <h2 style="font-size: 54px; margin: 12px 0; font-weight: 800;">100</h2>
+                <button class="btn-primary" style="background-color: var(--orange-accent); box-shadow: none;">Redeem my points</button>
+            </div>
+        </div>
+
+        <div id="tab-streaks" class="tab-panel">
+            <div class="info-card" style="flex-direction: column; text-align: center; padding: 30px 20px;">
+                <h3 style="margin-top: 0; font-size: 22px;">June Streaks</h3>
+                <p style="font-size: 16px; line-height: 1.5;">You have <strong>21 streak days</strong> this month, you got this!</p>
+            </div>
+        </div>
+
+    </div>
+
+	<nav class="bottom-nav">
+	    <button class="nav-item" onclick="switchTab('settings')">
+	        <img class="nav-icon-img" src="icons/icon-settings.png" alt="Settings">
+	        <div>Settings</div>
+	    </button>
+	    <button class="nav-item" onclick="switchTab('focus')">
+	        <img class="nav-icon-img" src="icons/icon-focus.png" alt="Focus">
+	        <div>Focus</div>
+	    </button>
+	    <button class="nav-item center-home active" onclick="switchTab('home')">
+	        <img class="nav-icon-img" src="icons/icon-home.png" alt="Home" style="width:44px;height:44px;object-fit:contain;">
+	        <div>Home</div>
+	    </button>
+	    <button class="nav-item" onclick="switchTab('rewards')">
+	        <img class="nav-icon-img" src="icons/icon-rewards.png" alt="Rewards">
+	        <div>Rewards</div>
+	    </button>
+	    <button class="nav-item" onclick="switchTab('streaks')">
+	        <img class="nav-icon-img" src="icons/icon-streaks.png" alt="Streaks">
+	        <div>Streaks</div>
+	    </button>
+	</nav>
+
+    <script>
+        var socket = io();
+
+        const titles = {
+            home: "Glad to see you again!",
+            focus: "Focus session",
+            settings: "Custom light",
+            rewards: "Your Rewards",
+            streaks: "Streaks"
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById('headerTitle').innerText = titles[tabId];
+
+            // Match dynamic streak changes shown on your screenshot variations
+            document.getElementById('streakCount').innerText = (tabId === 'home') ? "73" : "74";
+
+            const targetButton = Array.from(document.querySelectorAll('.nav-item')).find(btn => 
+                btn.getAttribute('onclick').includes(`'${tabId}'`)
+            );
+            if(targetButton) targetButton.classList.add('active');
+        }
+
+        function adjustValue(elementId, amount) {
+            const label = document.getElementById(`${elementId}Val`);
+            let current = parseInt(label.innerText);
+            current += amount;
+            if(current < 0) current = 0;
+            label.innerText = current;
+        }
+
+        const slider = document.getElementById('intensitySlider');
+        if(slider) {
+            slider.oninput = function() {
+                document.getElementById('intensityVal').innerText = this.value + "%";
+                sendLampCommand('brightness', this.value);
+            }
+        }
+
+        function selectPreset(colorHex) {
+            sendLampCommand('color', colorHex);
+        }
+
+        function sendLampCommand(type, val) {
+            socket.emit('lights', { type: type, status: val });
+        }
+    </script>
+</body>
 </html>
