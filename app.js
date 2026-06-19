@@ -3,7 +3,7 @@ var fs = require('fs');
 const axios = require("axios");
 
 // Set this to the IP shown by ESP32 on the Serial Monitor at boot
-const ESP32_IP = "192.168.1.xxx";
+const ESP32_IP = "192.168.0.74";
 
 var index = fs.readFileSync('index.html');
 
