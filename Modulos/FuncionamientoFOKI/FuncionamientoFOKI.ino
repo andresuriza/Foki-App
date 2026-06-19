@@ -1,4 +1,6 @@
 #include <Adafruit_NeoPixel.h>
+#include <WiFi.h>
+#include <WebServer.h>
 
 #define PIR_PIN 14
 #define VIBRADOR_PIN 27
@@ -8,7 +10,11 @@
 #define LED_PIN 4
 #define NUM_LEDS 30
 
+const char* ssid = "LIB-7095038";
+const char* password = "TU_PASSWORD";
+
 Adafruit_NeoPixel strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
+WebServer server(80);
 
 // ===================== CLASE BASE (abstracta) =====================
 class Modo {
@@ -122,6 +128,52 @@ int leerSonido() {
   return maximo;
 }
 
+// ===================== ENDPOINTS DEL SERVIDOR WEB =====================
+// Tu compañero puede llamar a estos endpoints desde la página web (fetch/AJAX)
+
+void handleRoot() {
+  String html = "<html><body>";
+  html += "<h1>LumaNest</h1>";
+  html += "<p>Modo actual: " + modos[modoActualIndex]->getNombre() + "</p>";
+  html += "<button onclick=\"fetch('/modo?valor=0')\">Tranquilo</button>";
+  html += "<button onclick=\"fetch('/modo?valor=1')\">Sobrecarga</button>";
+  html += "<button onclick=\"fetch('/modo?valor=2')\">Presencia</button>";
+  html += "</body></html>";
+  server.send(200, "text/html", html);
+}
+
+// GET /modo?valor=0|1|2  -> cambia el modo activo
+void handleSetModo() {
+  if (server.hasArg("valor")) {
+    int valor = server.arg("valor").toInt();
+    if (valor >= 0 && valor < 3) {
+      modoActualIndex = valor;
+      Serial.print("Modo cambiado desde web a: ");
+      Serial.println(modos[modoActualIndex]->getNombre());
+      server.send(200, "text/plain", "OK: " + modos[modoActualIndex]->getNombre());
+      return;
+    }
+  }
+  server.send(400, "text/plain", "Error: parametro 'valor' invalido (usar 0, 1 o 2)");
+}
+
+// GET /estado  -> devuelve JSON con los datos actuales (para que la pagina los muestre)
+void handleEstado() {
+  int luz = leerLuz();
+  int sonido = leerSonido();
+  int pir = digitalRead(PIR_PIN);
+  
+  String json = "{";
+  json += "\"modo\":" + String(modoActualIndex) + ",";
+  json += "\"nombreModo\":\"" + modos[modoActualIndex]->getNombre() + "\",";
+  json += "\"luz\":" + String(luz) + ",";
+  json += "\"sonido\":" + String(sonido) + ",";
+  json += "\"pir\":" + String(pir);
+  json += "}";
+  
+  server.send(200, "application/json", json);
+}
+
 void setup() {
   Serial.begin(115200);
   pinMode(PIR_PIN, INPUT);
@@ -136,17 +188,41 @@ void setup() {
   modos[1] = new ModoSobrecarga(&strip, VIBRADOR_PIN);
   modos[2] = new ModoPresencia(&strip, VIBRADOR_PIN);
   
+  // ---- Conexión WiFi ----
+  WiFi.begin(ssid, password);
+  Serial.print("Conectando a ");
+  Serial.println(ssid);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  
+  // ---- Endpoints ----
+  server.on("/", handleRoot);
+  server.on("/modo", handleSetModo);
+  server.on("/estado", handleEstado);
+  server.begin();
+  Serial.println("Servidor iniciado");
+  
   Serial.println("Calibrando PIR... (30 segundos)");
   delay(30000);
   Serial.println("Listo!");
 }
 
 void loop() {
+  server.handleClient(); // atiende peticiones web
+  
   bool botonPresionado = (digitalRead(BOTON_PIN) == LOW);
   
   if (botonPresionado && !botonPresionadoAntes) {
     modoActualIndex = (modoActualIndex + 1) % 3;
-    Serial.print("Cambiando a modo: ");
+    Serial.print("Cambiando a modo (boton): ");
     Serial.println(modos[modoActualIndex]->getNombre());
     delay(200);
   }
