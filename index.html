@@ -306,6 +306,11 @@
                     <div class="status-pill" id="moodDisplay">😐 Waiting</div>
                     <div class="status-pill" id="lampStatus">🔴 Lamp Offline</div>
                 </div>
+
+                <div class="info-card" style="margin-top: 12px; justify-content: space-between;">
+                    <span style="font-size: 15px; font-weight: 600;">Current State</span>
+                    <span id="currentModeDisplay" style="font-size: 15px; font-weight: 700; color: var(--orange-accent);">— —</span>
+                </div>
             </div>
 
             <!-- FOCUS TAB -->
@@ -509,6 +514,12 @@
             }
         });
 
+        var modeNames = { 0: 'Calm', 1: 'Ambiance', 2: 'Presence', 3: 'Focus', 4: 'Custom' };
+        socket.on('lamp-state', function(data) {
+            var el = document.getElementById('currentModeDisplay');
+            if (el) el.innerText = data.modo + ' — ' + (modeNames[data.modo] || data.nombreModo);
+        });
+
         var savedPoints  = localStorage.getItem('foki_points');
         var currentPoints = savedPoints !== null ? parseInt(savedPoints) : 100;
         var savedStreak  = localStorage.getItem('foki_streak');
@@ -601,6 +612,7 @@
                 return btn.getAttribute('onclick').includes("'" + tabId + "'");
             });
             if (targetButton) targetButton.classList.add('active');
+            if (tabId === 'focus') sendLampCommand('mode', 'FOCUS_IDLE');
         }
 
         function sendLampCommand(type, val) { socket.emit('lights', { type: type, status: val }); }

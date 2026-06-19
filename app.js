@@ -73,13 +73,13 @@ function translateMode(mode) {
     }
 }
 
-// ── ESP32 HEALTH CHECK ────────────────────────────────────────────
-async function checkESP32Status() {
+// ── ESP32 HEALTH CHECK + ESTADO ──────────────────────────────────
+async function getESP32Estado() {
     try {
-        await axios.get(`http://${ESP32_IP}/estado`, { timeout: 3000 });
-        return true;
+        const res = await axios.get(`http://${ESP32_IP}/estado`, { timeout: 3000 });
+        return { connected: true, ...res.data };
     } catch (error) {
-        return false;
+        return { connected: false };
     }
 }
 
@@ -88,15 +88,41 @@ io.on('connection', function(socket) {
     socket.on('lights', async function(data) {
         try {
             if (data.type === 'mode') {
-                const modeValue = translateMode(data.status);
-                if (modeValue !== null) {
-                    await axios.get(`http://${ESP32_IP}/modo?valor=${modeValue}`);
-                    console.log("Mode updated:", data.status, "→ ESP32 mode", modeValue);
+                if (data.status === 'FOCUS_IDLE') {
+                    await axios.get(`http://${ESP32_IP}/modo?valor=3`);
+                    console.log("Focus tab → parpadeando");
+                } else if (data.status === 'FOCUS_START') {
+                    await axios.get(`http://${ESP32_IP}/focus?estado=0`);
+                    console.log("Focus iniciado");
+                } else if (data.status === 'BREAK_START') {
+                    await axios.get(`http://${ESP32_IP}/focus?estado=1`);
+                    console.log("Break iniciado → vibrando 3s");
+                } else if (data.status === 'IDLE') {
+                    await axios.get(`http://${ESP32_IP}/focus?estado=2`);
+                    console.log("Focus idle");
                 } else {
-                    console.log("Unknown mode:", data.status);
+                    const modeValue = translateMode(data.status);
+                    if (modeValue !== null) {
+                        await axios.get(`http://${ESP32_IP}/modo?valor=${modeValue}`);
+                        console.log("Mode updated:", data.status, "→ ESP32 mode", modeValue);
+                    } else {
+                        console.log("Unknown mode:", data.status);
+                    }
                 }
+            } else if (data.type === 'color') {
+                const hex = data.status.replace('#', '');
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                await axios.get(`http://${ESP32_IP}/modo?valor=4`);
+                await axios.get(`http://${ESP32_IP}/color?r=${r}&g=${g}&b=${b}`);
+                console.log("Color custom:", data.status, "→", r, g, b);
+            } else if (data.type === 'brightness') {
+                const brillo = Math.round(parseInt(data.status) * 255 / 100);
+                await axios.get(`http://${ESP32_IP}/modo?valor=4`);
+                await axios.get(`http://${ESP32_IP}/brillo?valor=${brillo}`);
+                console.log("Brillo custom:", data.status, "% →", brillo);
             } else {
-                // Commands not yet supported by the current firmware (color, brightness, effect, focus_tag)
                 console.log("Unsupported command (skipped):", data.type, data.status);
             }
         } catch (error) {
@@ -107,9 +133,12 @@ io.on('connection', function(socket) {
 
 // ── LAMP STATUS POLLING (every 5 s) ──────────────────────────────
 setInterval(async () => {
-    const connected = await checkESP32Status();
-    console.log("ESP32:", connected ? "ONLINE" : "OFFLINE");
-    io.emit("lamp-status", { connected });
+    const estado = await getESP32Estado();
+    console.log("ESP32:", estado.connected ? "ONLINE" : "OFFLINE");
+    io.emit("lamp-status", { connected: estado.connected });
+    if (estado.connected) {
+        io.emit("lamp-state", { modo: estado.modo, nombreModo: estado.nombreModo });
+    }
 }, 5000);
 
 app.listen(3000, () => {
