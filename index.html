@@ -16,10 +16,175 @@
     <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
 
     <style>
-        /* CSS REMAINS UNCHANGED FROM PREVIOUS VERSION */
-        html, body { height: 100%; margin: 0; padding: 0; font-weight: 600; font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-yellow); color: var(--text-dark-red); display: flex; flex-direction: column; overflow: hidden; -webkit-tap-highlight-color: transparent; }
-        :root { --bg-yellow: #FCD873; --text-dark-red: #A93333; --card-light: #F9FFF0; --btn-blue: #46C0D7; --nav-bg: #F9FFF0; --card-red: #C53737; --orange-accent: #E98353; --text-muted: #C58888; --pill-bg: #FDE49E; }
+        /* ── BASE ────────────────────────────────────── */
+        :root {
+            --bg-yellow: #FCD873;
+            --text-dark-red: #A93333;
+            --card-light: #F9FFF0;
+            --btn-blue: #46C0D7;
+            --nav-bg: #F9FFF0;
+            --card-red: #C53737;
+            --orange-accent: #E98353;
+            --text-muted: #C58888;
+            --pill-bg: #FDE49E;
+        }
         * { box-sizing: border-box; }
+        html, body {
+            height: 100%; margin: 0; padding: 0;
+            font-weight: 600;
+            font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-yellow);
+            color: var(--text-dark-red);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ── WELCOME SCREEN ───────────────────────────── */
+        #welcomeScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, #FCD873 0%, #F89C6B 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            padding: 0 28px;
+            overflow: hidden;
+        }
+
+        .ws-top {
+            padding-top: calc(52px + env(safe-area-inset-top, 0px));
+            position: relative;
+        }
+
+        .ws-headline {
+            display: flex;
+            flex-direction: column;
+            font-size: 38px;
+            font-weight: 800;
+            line-height: 1.15;
+            color: var(--text-dark-red);
+            max-width: 65%;
+        }
+
+        /* Speech bubbles */
+        .ws-bubble {
+            position: absolute;
+            background-color: var(--orange-accent);
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 10px 16px;
+            border-radius: 18px;
+            box-shadow: 0 4px 12px rgba(233, 131, 83, 0.35);
+        }
+        .ws-bubble::after {
+            content: '';
+            position: absolute;
+            border: 8px solid transparent;
+        }
+        .ws-bubble-1 {
+            top: 10px;
+            right: 0;
+            transform: rotate(4deg);
+        }
+        .ws-bubble-1::after {
+            bottom: -13px; left: 16px;
+            border-top-color: var(--orange-accent);
+        }
+        .ws-bubble-2 {
+            top: 68px;
+            right: 16px;
+            transform: rotate(-3deg);
+        }
+        .ws-bubble-2::after {
+            bottom: -13px; right: 16px;
+            border-top-color: var(--orange-accent);
+        }
+
+        /* Decorative stars */
+        .ws-star {
+            position: absolute;
+            color: var(--text-dark-red);
+            font-size: 18px;
+            opacity: 0.35;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Mascot area */
+        .ws-mascot-wrap {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 0;
+        }
+        .ws-mascot {
+            width: 78%;
+            max-width: 300px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 16px 24px rgba(169, 51, 51, 0.18));
+        }
+
+        /* CTA */
+        .ws-cta-wrap {
+            padding: 20px 0 calc(44px + env(safe-area-inset-bottom, 0px));
+        }
+        .ws-btn {
+            background-color: var(--card-red);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 20px;
+            border-radius: 20px;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 8px 20px rgba(197, 55, 55, 0.38);
+            transition: transform 0.1s;
+            letter-spacing: 0.01em;
+        }
+        .ws-btn:active { transform: scale(0.97); }
+
+        /* ── ANIMATIONS ────────────────────────────────── */
+        @keyframes float {
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes floatStar {
+            0%   { transform: translateY(0px) rotate(0deg); }
+            50%  { transform: translateY(-8px) rotate(15deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .ws-mascot { animation: float 4s ease-in-out infinite; }
+
+        .ws-star-a { animation: floatStar 4s ease-in-out infinite; animation-delay: 0s; }
+        .ws-star-b { animation: floatStar 4s ease-in-out infinite; animation-delay: 1s; }
+        .ws-star-c { animation: floatStar 4s ease-in-out infinite; animation-delay: 2s; }
+        .ws-star-d { animation: floatStar 4s ease-in-out infinite; animation-delay: 3s; }
+        .ws-star-e { animation: floatStar 4s ease-in-out infinite; animation-delay: 1.5s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .ws-mascot, .ws-star-a, .ws-star-b, .ws-star-c, .ws-star-d, .ws-star-e {
+                animation: none;
+            }
+        }
+
+        /* ── MAIN APP WRAPPER ──────────────────────────── */
+        #mainApp {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ── EXISTING APP STYLES (unchanged) ──────────── */
         .top-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 24px 10px 24px; width: 100%; max-width: 480px; margin: 0 auto; }
         .top-header h1 { margin: 0; font-size: 28px; font-weight: bold; line-height: 1.2; max-width: 70%; }
         .streak-badge { background-color: var(--card-light); padding: 6px 14px; border-radius: 10px; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -67,209 +232,282 @@
 </head>
 <body>
 
-    <div class="top-header">
-        <h1 id="headerTitle">Glad to see you again!</h1>
-        <div class="streak-badge">🔥 <span id="streakCount">0</span></div>
-    </div>
+    <!-- ══════════════════════════════════════════════════
+         WELCOME / ONBOARDING SCREEN
+    ══════════════════════════════════════════════════ -->
+    <div id="welcomeScreen">
 
-    <div class="app-content">
+        <!-- Decorative stars scattered across the screen -->
+        <span class="ws-star ws-star-a" style="top: 8%;  left: 6%;">✦</span>
+        <span class="ws-star ws-star-b" style="top: 14%; right: 14%;">✦</span>
+        <span class="ws-star ws-star-c" style="top: 48%; left: 4%;">✦</span>
+        <span class="ws-star ws-star-d" style="top: 60%; right: 6%;">✦</span>
+        <span class="ws-star ws-star-e" style="bottom: 28%; left: 10%;">✦</span>
 
-        <!-- HOME TAB -->
-        <div id="tab-home" class="tab-panel active">
-            <div class="character-card">
-                <img id="fokiImage" src="images/foki-normal.png" alt="Foki Mushroom" onerror="this.src='https://via.placeholder.com/380x300?text=Foki+Normal'">
+        <!-- Top section: headline + floating bubbles -->
+        <div class="ws-top">
+            <div class="ws-headline">
+                <span>Go for better</span>
+                <span>habits with</span>
+                <span>Foki!</span>
             </div>
 
-            <div class="info-card overlay-card">
-                <div style="font-size: 18px; font-weight: 600; color: var(--text-dark-red);">Lamp Mode</div>
-                <div class="pill-container" id="globalModePills">
-                    <button class="pill-btn" onclick="setLampMode('CALM', this)">Calm</button>
-                    <button class="pill-btn active" onclick="setLampMode('FOCUS', this)">Focus</button>
-                    <button class="pill-btn" onclick="setLampMode('SENSORY', this)">Sensory</button>
-                    <button class="pill-btn" onclick="switchTab('settings')">Custom</button>
-                </div>
-            </div>
-
-            <div class="status-row" style="margin-top: 0;">
-                <div class="status-pill" id="moodDisplay">😐 Waiting</div>
-            </div>
+            <!-- Speech bubbles (decorative) -->
+            <div class="ws-bubble ws-bubble-1">Hi!!</div>
+            <div class="ws-bubble ws-bubble-2">Let's start</div>
         </div>
 
-        <!-- FOCUS TAB -->
-        <div id="tab-focus" class="tab-panel">
-            <div class="character-card" style="background: linear-gradient(135deg, #FFB75E, #ED8F03);">
-                <img src="images/foki-focus.png" alt="Foki Focus" onerror="this.src='https://via.placeholder.com/380x250?text=Foki+Focus'">
-            </div>
+        <!-- Mascot — visual anchor of the screen -->
+        <div class="ws-mascot-wrap">
+            <img
+                class="ws-mascot"
+                src="images/foki-normal.png"
+                alt="Foki the mushroom mascot"
+                onerror="this.src='https://via.placeholder.com/300x300?text=Foki'"
+            >
+        </div>
 
-            <div id="timerSetupView">
+        <!-- CTA -->
+        <div class="ws-cta-wrap">
+            <button class="ws-btn" onclick="startApp()">Get Started</button>
+        </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         MAIN APPLICATION (hidden until onboarding done)
+    ══════════════════════════════════════════════════ -->
+    <div id="mainApp">
+
+        <div class="top-header">
+            <h1 id="headerTitle">Glad to see you again!</h1>
+            <div class="streak-badge">🔥 <span id="streakCount">0</span></div>
+        </div>
+
+        <div class="app-content">
+
+            <!-- HOME TAB -->
+            <div id="tab-home" class="tab-panel active">
+                <div class="character-card">
+                    <img id="fokiImage" src="images/foki-normal.png" alt="Foki Mushroom" onerror="this.src='https://via.placeholder.com/380x300?text=Foki+Normal'">
+                </div>
+
                 <div class="info-card overlay-card">
-                    <div style="font-size: 18px; font-weight: 600; color: var(--text-dark-red);">What are you focusing on?</div>
-                    <div class="pill-container" id="focusTagPills">
-                        <button class="pill-btn active" onclick="setFocusTag(this)">Study</button>
-                        <button class="pill-btn" onclick="setFocusTag(this)">Creative</button>
-                        <button class="pill-btn" onclick="setFocusTag(this)">Work</button>
+                    <div style="font-size: 18px; font-weight: 600; color: var(--text-dark-red);">Lamp Mode</div>
+                    <div class="pill-container" id="globalModePills">
+                        <button class="pill-btn" onclick="setLampMode('CALM', this)">Calm</button>
+                        <button class="pill-btn active" onclick="setLampMode('FOCUS', this)">Focus</button>
+                        <button class="pill-btn" onclick="setLampMode('SENSORY', this)">Sensory</button>
+                        <button class="pill-btn" onclick="switchTab('settings')">Custom</button>
                     </div>
-                    <div style="margin-top: 12px; color: var(--bg-yellow); font-size: 28px; cursor: pointer; font-weight: 800;">⊕</div>
                 </div>
 
-                <div class="info-card">
-                    <div class="timer-row">
-                        <span class="timer-label">Focus time</span>
-                        <div class="counter-controls">
-                            <button class="counter-btn plus" onclick="adjustValue('focusTime', 5)">+</button>
-                            <div class="time-display">
-                                <span id="focusTimeVal" class="time-val">30</span>
-                                <span class="time-sub">Minutes</span>
+                <div class="status-row" style="margin-top: 0;">
+                    <div class="status-pill" id="moodDisplay">😐 Waiting</div>
+                </div>
+            </div>
+
+            <!-- FOCUS TAB -->
+            <div id="tab-focus" class="tab-panel">
+                <div class="character-card" style="background: linear-gradient(135deg, #FFB75E, #ED8F03);">
+                    <img src="images/foki-focus.png" alt="Foki Focus" onerror="this.src='https://via.placeholder.com/380x250?text=Foki+Focus'">
+                </div>
+
+                <div id="timerSetupView">
+                    <div class="info-card overlay-card">
+                        <div style="font-size: 18px; font-weight: 600; color: var(--text-dark-red);">What are you focusing on?</div>
+                        <div class="pill-container" id="focusTagPills">
+                            <button class="pill-btn active" onclick="setFocusTag(this)">Study</button>
+                            <button class="pill-btn" onclick="setFocusTag(this)">Creative</button>
+                            <button class="pill-btn" onclick="setFocusTag(this)">Work</button>
+                        </div>
+                        <div style="margin-top: 12px; color: var(--bg-yellow); font-size: 28px; cursor: pointer; font-weight: 800;">⊕</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="timer-row">
+                            <span class="timer-label">Focus time</span>
+                            <div class="counter-controls">
+                                <button class="counter-btn plus" onclick="adjustValue('focusTime', 5)">+</button>
+                                <div class="time-display">
+                                    <span id="focusTimeVal" class="time-val">30</span>
+                                    <span class="time-sub">Minutes</span>
+                                </div>
+                                <button class="counter-btn minus" onclick="adjustValue('focusTime', -5)">−</button>
                             </div>
-                            <button class="counter-btn minus" onclick="adjustValue('focusTime', -5)">−</button>
                         </div>
                     </div>
-                </div>
 
-                <div class="info-card">
-                    <div class="timer-row">
-                        <span class="timer-label">Break time</span>
-                        <div class="counter-controls">
-                            <button class="counter-btn plus" onclick="adjustValue('breakTime', 1)">+</button>
-                            <div class="time-display">
-                                <span id="breakTimeVal" class="time-val">5</span>
-                                <span class="time-sub">Minutes</span>
+                    <div class="info-card">
+                        <div class="timer-row">
+                            <span class="timer-label">Break time</span>
+                            <div class="counter-controls">
+                                <button class="counter-btn plus" onclick="adjustValue('breakTime', 1)">+</button>
+                                <div class="time-display">
+                                    <span id="breakTimeVal" class="time-val">5</span>
+                                    <span class="time-sub">Minutes</span>
+                                </div>
+                                <button class="counter-btn minus" onclick="adjustValue('breakTime', -1)">−</button>
                             </div>
-                            <button class="counter-btn minus" onclick="adjustValue('breakTime', -1)">−</button>
                         </div>
                     </div>
+                    <button class="btn-primary" onclick="startSession()">Start Session</button>
                 </div>
-                <button class="btn-primary" onclick="startSession()">Start Session</button>
+
+                <div id="activeTimerView">
+                    <div id="sessionStatus">Focusing hard!</div>
+                    <div id="timerDisplay">30:00</div>
+                    <button class="btn-primary btn-danger" onclick="cancelSession()">End Session</button>
+                </div>
             </div>
 
-            <div id="activeTimerView">
-                <div id="sessionStatus">Focusing hard!</div>
-                <div id="timerDisplay">30:00</div>
-                <button class="btn-primary btn-danger" onclick="cancelSession()">End Session</button>
+            <!-- SETTINGS TAB -->
+            <div id="tab-settings" class="tab-panel">
+
+                <!-- PWA INSTALL BANNER -->
+                <div class="info-card" id="installCard" style="display: none; background-color: var(--card-light); flex-direction: column; text-align: center; border: 2px dashed var(--btn-blue);">
+                    <h3 style="margin: 0 0 8px 0; font-size: 20px;">Install Foki App</h3>
+                    <p style="margin: 0 0 16px 0; font-size: 14px; font-weight: 400; color: var(--text-dark-red);">Install Foki to your home screen for a seamless, fullscreen experience!</p>
+                    <button class="btn-primary" id="installBtn" style="padding: 12px;">Install Now</button>
+                </div>
+
+                <div class="color-wheel-container" id="colorWheel"></div>
+                <div class="palette-grid">
+                    <button class="color-swatch" style="background-color: #FF7676;" onclick="selectPreset('#FF7676')"></button>
+                    <button class="color-swatch" style="background-color: #38B6FF;" onclick="selectPreset('#38B6FF')"></button>
+                    <button class="color-swatch" style="background-color: #1371FF;" onclick="selectPreset('#1371FF')"></button>
+                    <button class="color-swatch" style="background-color: #B576FF;" onclick="selectPreset('#B576FF')"></button>
+                    <button class="color-swatch" style="background-color: #FF388B;" onclick="selectPreset('#FF388B')"></button>
+                </div>
+                <div class="slider-container">
+                    <h3>Light Intensity: <span id="intensityVal">44%</span></h3>
+                    <input type="range" min="0" max="100" value="44" class="custom-slider" id="intensitySlider">
+                </div>
             </div>
+
+            <!-- REWARDS TAB -->
+            <div id="tab-rewards" class="tab-panel">
+                <div class="character-card" style="background: #C53737;">
+                    <img src="images/foki-stars.png" alt="Foki Rewards" onerror="this.src='https://via.placeholder.com/380x200?text=Foki+Rewards'">
+                </div>
+                <div class="info-card" style="background-color: var(--card-light); flex-direction: column; padding: 24px; text-align: center;">
+                    <span style="font-size: 16px; font-weight: bold;">Points to Redeem</span>
+                    <h2 id="pointsDisplay" style="font-size: 54px; margin: 12px 0; font-weight: 800;">0</h2>
+                    <button class="btn-primary" style="background-color: var(--orange-accent); box-shadow: none;" onclick="redeemPoints()">Spend 50 points</button>
+                </div>
+            </div>
+
+            <!-- STREAKS TAB -->
+            <div id="tab-streaks" class="tab-panel">
+                <div class="info-card" style="flex-direction: column; text-align: center; padding: 30px 20px;">
+                    <h3 style="margin-top: 0; font-size: 22px;">Current Streaks</h3>
+                    <p style="font-size: 16px; line-height: 1.5;">You have completed <strong id="streakTabCount">0</strong> focus sessions, you got this!</p>
+                </div>
+            </div>
+
         </div>
 
-        <!-- SETTINGS TAB -->
-        <div id="tab-settings" class="tab-panel">
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav">
+            <button class="nav-item" onclick="switchTab('settings')">
+                <img class="nav-icon-img" src="icons/icon-settings.png" alt="Settings" onerror="this.style.display='none'">
+                <div>Settings</div>
+            </button>
+            <button class="nav-item" onclick="switchTab('focus')">
+                <img class="nav-icon-img" src="icons/icon-focus.png" alt="Focus" onerror="this.style.display='none'">
+                <div>Focus</div>
+            </button>
+            <button class="nav-item center-home active" onclick="switchTab('home')">
+                <img class="nav-icon-img" src="icons/icon-home.png" alt="Home" style="width:44px;height:44px;object-fit:contain;" onerror="this.style.display='none'">
+                <div>Home</div>
+            </button>
+            <button class="nav-item" onclick="switchTab('rewards')">
+                <img class="nav-icon-img" src="icons/icon-rewards.png" alt="Rewards" onerror="this.style.display='none'">
+                <div>Rewards</div>
+            </button>
+            <button class="nav-item" onclick="switchTab('streaks')">
+                <img class="nav-icon-img" src="icons/icon-streaks.png" alt="Streaks" onerror="this.style.display='none'">
+                <div>Streaks</div>
+            </button>
+        </nav>
 
-            <!-- PWA INSTALL BANNER -->
-            <div class="info-card" id="installCard" style="display: none; background-color: var(--card-light); flex-direction: column; text-align: center; border: 2px dashed var(--btn-blue);">
-                <h3 style="margin: 0 0 8px 0; font-size: 20px;">Install Foki App</h3>
-                <p style="margin: 0 0 16px 0; font-size: 14px; font-weight: 400; color: var(--text-dark-red);">Install Foki to your home screen for a seamless, fullscreen experience!</p>
-                <button class="btn-primary" id="installBtn" style="padding: 12px;">Install Now</button>
-            </div>
-
-            <div class="color-wheel-container" id="colorWheel"></div>
-            <div class="palette-grid">
-                <button class="color-swatch" style="background-color: #FF7676;" onclick="selectPreset('#FF7676')"></button>
-                <button class="color-swatch" style="background-color: #38B6FF;" onclick="selectPreset('#38B6FF')"></button>
-                <button class="color-swatch" style="background-color: #1371FF;" onclick="selectPreset('#1371FF')"></button>
-                <button class="color-swatch" style="background-color: #B576FF;" onclick="selectPreset('#B576FF')"></button>
-                <button class="color-swatch" style="background-color: #FF388B;" onclick="selectPreset('#FF388B')"></button>
-            </div>
-            <div class="slider-container">
-                <h3>Light Intensity: <span id="intensityVal">44%</span></h3>
-                <input type="range" min="0" max="100" value="44" class="custom-slider" id="intensitySlider">
-            </div>
-        </div>
-
-        <!-- REWARDS TAB -->
-        <div id="tab-rewards" class="tab-panel">
-            <div class="character-card" style="background: #C53737;">
-                <img src="images/foki-stars.png" alt="Foki Rewards" onerror="this.src='https://via.placeholder.com/380x200?text=Foki+Rewards'">
-            </div>
-            <div class="info-card" style="background-color: var(--card-light); flex-direction: column; padding: 24px; text-align: center;">
-                <span style="font-size: 16px; font-weight: bold;">Points to Redeem</span>
-                <h2 id="pointsDisplay" style="font-size: 54px; margin: 12px 0; font-weight: 800;">0</h2>
-                <button class="btn-primary" style="background-color: var(--orange-accent); box-shadow: none;" onclick="redeemPoints()">Spend 50 points</button>
-            </div>
-        </div>
-
-        <!-- STREAKS TAB -->
-        <div id="tab-streaks" class="tab-panel">
-            <div class="info-card" style="flex-direction: column; text-align: center; padding: 30px 20px;">
-                <h3 style="margin-top: 0; font-size: 22px;">Current Streaks</h3>
-                <p style="font-size: 16px; line-height: 1.5;">You have completed <strong id="streakTabCount">0</strong> focus sessions, you got this!</p>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- BOTTOM NAV -->
-    <nav class="bottom-nav">
-        <button class="nav-item" onclick="switchTab('settings')">
-            <img class="nav-icon-img" src="icons/icon-settings.png" alt="Settings" onerror="this.style.display='none'">
-            <div>Settings</div>
-        </button>
-        <button class="nav-item" onclick="switchTab('focus')">
-            <img class="nav-icon-img" src="icons/icon-focus.png" alt="Focus" onerror="this.style.display='none'">
-            <div>Focus</div>
-        </button>
-        <button class="nav-item center-home active" onclick="switchTab('home')">
-            <img class="nav-icon-img" src="icons/icon-home.png" alt="Home" style="width:44px;height:44px;object-fit:contain;" onerror="this.style.display='none'">
-            <div>Home</div>
-        </button>
-        <button class="nav-item" onclick="switchTab('rewards')">
-            <img class="nav-icon-img" src="icons/icon-rewards.png" alt="Rewards" onerror="this.style.display='none'">
-            <div>Rewards</div>
-        </button>
-        <button class="nav-item" onclick="switchTab('streaks')">
-            <img class="nav-icon-img" src="icons/icon-streaks.png" alt="Streaks" onerror="this.style.display='none'">
-            <div>Streaks</div>
-        </button>
-    </nav>
+    </div><!-- /#mainApp -->
 
     <script>
-        // --- PWA SERVICE WORKER & INSTALLATION ---
+        // ── ONBOARDING SCREEN LOGIC ───────────────────────────────────────
+        function showWelcomeScreen() {
+            document.getElementById('welcomeScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+        }
+
+        function showMainApp() {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+        }
+
+        function startApp() {
+            localStorage.setItem('foki_onboarded', 'true');
+            // Fade out welcome screen before revealing the app
+            var ws = document.getElementById('welcomeScreen');
+            ws.style.transition = 'opacity 0.35s ease';
+            ws.style.opacity = '0';
+            setTimeout(showMainApp, 360);
+        }
+
+        // Decide which screen to show on load
+        if (localStorage.getItem('foki_onboarded')) {
+            showMainApp();
+        } else {
+            showWelcomeScreen();
+        }
+
+
+        // ── PWA SERVICE WORKER & INSTALLATION ────────────────────────────
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+            window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Service Worker Registered!'))
-                    .catch(err => console.error('Service Worker Registration Failed!', err));
+                    .then(function(reg) { console.log('Service Worker Registered!'); })
+                    .catch(function(err) { console.error('Service Worker Registration Failed!', err); });
             });
         }
 
-        let deferredPrompt;
-        const installCard = document.getElementById('installCard');
-        const installBtn = document.getElementById('installBtn');
+        var deferredPrompt;
+        var installCard = document.getElementById('installCard');
+        var installBtn  = document.getElementById('installBtn');
 
-        // This event fires if the browser detects the app can be installed
-        window.addEventListener('beforeinstallprompt', (e) => {
+        window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
             deferredPrompt = e;
-            // Show the Install Banner in the Settings Tab
             installCard.style.display = 'flex';
         });
 
-        installBtn.addEventListener('click', async () => {
+        installBtn.addEventListener('click', async function() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('User installed Foki');
-                }
+                var result = await deferredPrompt.userChoice;
+                if (result.outcome === 'accepted') { console.log('User installed Foki'); }
                 deferredPrompt = null;
                 installCard.style.display = 'none';
             }
         });
 
-        window.addEventListener('appinstalled', () => {
+        window.addEventListener('appinstalled', function() {
             installCard.style.display = 'none';
             console.log('Foki app successfully installed');
         });
 
 
-        // --- APPLICATION LOGIC ---
+        // ── APPLICATION LOGIC ─────────────────────────────────────────────
         var socket = io();
 
-        let savedPoints = localStorage.getItem('foki_points');
-        let currentPoints = savedPoints !== null ? parseInt(savedPoints) : 100;
-        let savedStreak = localStorage.getItem('foki_streak');
-        let currentStreak = savedStreak !== null ? parseInt(savedStreak) : 73;
+        var savedPoints  = localStorage.getItem('foki_points');
+        var currentPoints = savedPoints !== null ? parseInt(savedPoints) : 100;
+        var savedStreak  = localStorage.getItem('foki_streak');
+        var currentStreak = savedStreak !== null ? parseInt(savedStreak) : 73;
 
-        let lastSessionDate = localStorage.getItem('foki_last_session_date') || null;
-        let sessionsToday = parseInt(localStorage.getItem('foki_sessions_today')) || 0;
-        let savedDateForReset = localStorage.getItem('foki_current_date') || null;
+        var lastSessionDate  = localStorage.getItem('foki_last_session_date') || null;
+        var sessionsToday    = parseInt(localStorage.getItem('foki_sessions_today')) || 0;
+        var savedDateForReset = localStorage.getItem('foki_current_date') || null;
 
         function persistData() {
             localStorage.setItem('foki_points', currentPoints);
@@ -286,7 +524,7 @@
         }
 
         function checkDailyReset() {
-            let todayString = new Date().toDateString();
+            var todayString = new Date().toDateString();
             if (savedDateForReset !== todayString) {
                 sessionsToday = 0;
                 savedDateForReset = todayString;
@@ -297,27 +535,36 @@
 
         function getDaysSinceLastSession() {
             if (!lastSessionDate) return 999;
-            let d1 = new Date(lastSessionDate);
-            let d2 = new Date();
+            var d1 = new Date(lastSessionDate);
+            var d2 = new Date();
             d1.setHours(0,0,0,0);
             d2.setHours(0,0,0,0);
-            let diff = Math.abs(d2 - d1) / (1000 * 60 * 60 * 24);
+            var diff = Math.abs(d2 - d1) / (1000 * 60 * 60 * 24);
             return Math.ceil(diff);
         }
 
         function updateMood() {
             checkDailyReset();
-            let daysSince = getDaysSinceLastSession();
-            let moodText = "😐 Waiting";
-            let imageSrc = "images/foki-normal.png";
+            var daysSince = getDaysSinceLastSession();
+            var moodText = "😐 Waiting";
+            var imageSrc = "images/foki-normal.png";
 
-            if (daysSince >= 3) { moodText = "😴 Sleepy"; imageSrc = "images/foki-sleepy.png"; }
-            else if (sessionsToday >= 3) { moodText = "🔥 On Fire"; imageSrc = "images/foki-fire.png"; }
-            else if (sessionsToday >= 1) { moodText = "😊 Happy"; imageSrc = "images/foki-happy.png"; }
-            else { moodText = "😐 Waiting"; imageSrc = "images/foki-normal.png"; }
+            if (daysSince >= 3)       { moodText = "😴 Sleepy"; 
+		    			//imageSrc = "images/foki-sleepy.png"; 
+	    }
+            else if (sessionsToday >= 3) { moodText = "🔥 On Fire"; 
+		    			//imageSrc = "images/foki-fire.png"; 
+	    }
+            else if (sessionsToday >= 1) { moodText = "😊 Happy";  
+		    			//imageSrc = "images/foki-happy.png"; 
+	    }
+            else                         { moodText = "😐 Waiting"; 
+		    			//imageSrc = "images/foki-normal.png"; 
+	    }
+
 
             document.getElementById('moodDisplay').innerText = moodText;
-            let fokiImg = document.getElementById('fokiImage');
+            var fokiImg = document.getElementById('fokiImage');
             if (fokiImg) { fokiImg.src = imageSrc; }
             localStorage.setItem('foki_mood', moodText);
         }
@@ -335,36 +582,38 @@
         updateStreakDisplay();
         updateMood();
 
-        const titles = { home: "Glad to see you again!", focus: "Focus session", settings: "Custom light", rewards: "Your Rewards", streaks: "Streaks" };
+        var titles = { home: "Glad to see you again!", focus: "Focus session", settings: "Custom light", rewards: "Your Rewards", streaks: "Streaks" };
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.querySelectorAll('.tab-panel').forEach(function(panel) { panel.classList.remove('active'); });
+            document.querySelectorAll('.nav-item').forEach(function(item)  { item.classList.remove('active'); });
+            document.getElementById('tab-' + tabId).classList.add('active');
             document.getElementById('headerTitle').innerText = titles[tabId];
-            const targetButton = Array.from(document.querySelectorAll('.nav-item')).find(btn => btn.getAttribute('onclick').includes(`'${tabId}'`));
-            if(targetButton) targetButton.classList.add('active');
+            var targetButton = Array.from(document.querySelectorAll('.nav-item')).find(function(btn) {
+                return btn.getAttribute('onclick').includes("'" + tabId + "'");
+            });
+            if (targetButton) targetButton.classList.add('active');
         }
 
         function sendLampCommand(type, val) { socket.emit('lights', { type: type, status: val }); }
         function setLampMode(mode, btnElement) {
-            const pills = document.getElementById('globalModePills').getElementsByClassName('pill-btn');
-            for(let p of pills) p.classList.remove('active');
+            var pills = document.getElementById('globalModePills').getElementsByClassName('pill-btn');
+            for (var p of pills) p.classList.remove('active');
             btnElement.classList.add('active');
             sendLampCommand('mode', mode);
         }
         function setFocusTag(btnElement) {
-            const pills = document.getElementById('focusTagPills').getElementsByClassName('pill-btn');
-            for(let p of pills) p.classList.remove('active');
+            var pills = document.getElementById('focusTagPills').getElementsByClassName('pill-btn');
+            for (var p of pills) p.classList.remove('active');
             btnElement.classList.add('active');
             sendLampCommand('focus_tag', btnElement.innerText.toUpperCase());
         }
 
-        let timerInterval; let timeRemainingSeconds = 0; let isFocusing = false; let focusMinutesSet = 0;
+        var timerInterval; var timeRemainingSeconds = 0; var isFocusing = false; var focusMinutesSet = 0;
         function adjustValue(elementId, amount) {
-            const label = document.getElementById(`${elementId}Val`);
-            let current = parseInt(label.innerText);
+            var label = document.getElementById(elementId + 'Val');
+            var current = parseInt(label.innerText);
             current += amount;
-            if(current < 1) current = 1;
+            if (current < 1) current = 1;
             label.innerText = current;
         }
 
@@ -388,14 +637,14 @@
                     timeRemainingSeconds = parseInt(document.getElementById('breakTimeVal').innerText) * 60;
                     document.getElementById('sessionStatus').innerText = "Break Time!";
                     sendLampCommand('mode', 'BREAK_START');
-                    let pointsEarned = focusMinutesSet * 5;
+                    var pointsEarned = focusMinutesSet * 5;
                     currentPoints += pointsEarned;
                     currentStreak++;
                     updatePointsDisplay();
                     updateStreakDisplay();
                     persistData();
                     recordCompletedSession();
-                    alert(`Focus complete! Earned ${pointsEarned} points! You are now in '${localStorage.getItem('foki_mood')}' mood.`);
+                    alert('Focus complete! Earned ' + pointsEarned + ' points! You are now in \'' + localStorage.getItem('foki_mood') + '\' mood.');
                 } else {
                     clearInterval(timerInterval);
                     cancelSession();
@@ -406,9 +655,12 @@
         }
 
         function updateTimerText() {
-            let m = Math.floor(timeRemainingSeconds / 60); let s = timeRemainingSeconds % 60;
-            document.getElementById('timerDisplay').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            var m = Math.floor(timeRemainingSeconds / 60);
+            var s = timeRemainingSeconds % 60;
+            document.getElementById('timerDisplay').innerText =
+                m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
         }
+
         function cancelSession() {
             clearInterval(timerInterval);
             document.getElementById('timerSetupView').style.display = 'block';
@@ -417,21 +669,29 @@
         }
 
         function redeemPoints() {
-            if(currentPoints >= 50) {
+            if (currentPoints >= 50) {
                 currentPoints -= 50;
-                updatePointsDisplay(); persistData();
-                sendLampCommand('effect', 'CELEBRATE'); alert("Redeemed 50 points!");
-            } else { alert("Not enough points!"); }
+                updatePointsDisplay();
+                persistData();
+                sendLampCommand('effect', 'CELEBRATE');
+                alert("Redeemed 50 points!");
+            } else {
+                alert("Not enough points!");
+            }
         }
 
-        var colorPicker = new iro.ColorPicker("#colorWheel", { width: 220, color: "#FCD873", borderWidth: 2, borderColor: "#fff", layout: [{ component: iro.ui.Wheel }] });
+        var colorPicker = new iro.ColorPicker("#colorWheel", {
+            width: 220, color: "#FCD873",
+            borderWidth: 2, borderColor: "#fff",
+            layout: [{ component: iro.ui.Wheel }]
+        });
         colorPicker.on('input:end', function(color) { sendLampCommand('color', color.hexString); });
         function selectPreset(colorHex) { colorPicker.color.hexString = colorHex; sendLampCommand('color', colorHex); }
 
-        const slider = document.getElementById('intensitySlider');
-        if(slider) {
-            slider.oninput = function() { document.getElementById('intensityVal').innerText = this.value + "%"; }
-            slider.onchange = function() { sendLampCommand('brightness', this.value); }
+        var slider = document.getElementById('intensitySlider');
+        if (slider) {
+            slider.oninput  = function() { document.getElementById('intensityVal').innerText = this.value + "%"; };
+            slider.onchange = function() { sendLampCommand('brightness', this.value); };
         }
     </script>
 </body>
