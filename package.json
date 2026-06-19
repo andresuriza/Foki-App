@@ -3,6 +3,7 @@
     "version": "0.0.1",
     "description": "HTML frontend para proyecto con Arduino",
     "dependencies": {
+        "axios": "^1.18.0",
         "serialport": "^9.0.1",
         "socket.io": "^4.8.3"
     }

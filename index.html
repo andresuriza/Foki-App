@@ -304,6 +304,7 @@
 
                 <div class="status-row" style="margin-top: 0;">
                     <div class="status-pill" id="moodDisplay">😐 Waiting</div>
+                    <div class="status-pill" id="lampStatus">🔴 Lamp Offline</div>
                 </div>
             </div>
 
@@ -499,6 +500,14 @@
 
         // ── APPLICATION LOGIC ─────────────────────────────────────────────
         var socket = io();
+
+        // ── LAMP STATUS LISTENER ──────────────────────────────────────
+        socket.on('lamp-status', function(data) {
+            var el = document.getElementById('lampStatus');
+            if (el) {
+                el.innerText = data.connected ? '🟢 Lamp Connected' : '🔴 Lamp Offline';
+            }
+        });
 
         var savedPoints  = localStorage.getItem('foki_points');
         var currentPoints = savedPoints !== null ? parseInt(savedPoints) : 100;
