@@ -11,7 +11,7 @@
 #define NUM_LEDS 30
 
 const char* ssid = "LIB-7095038";
-const char* password = "TU_PASSWORD";
+const char* password = "q3cvdacRzs2Z";
 
 Adafruit_NeoPixel strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
 WebServer server(80);
@@ -57,22 +57,50 @@ class ModoSobrecarga : public Modo {
     ModoSobrecarga(Adafruit_NeoPixel* strip, int vibPin) : Modo(strip, vibPin) {}
     
     void ejecutar(int luz, int sonido, int pir) override {
-      if (sonido > 1500) {
-        tira->setBrightness(40);
-        tira->fill(tira->Color(50, 0, 100));
+      if (sonido < 1100) {
+        // Silencio
+        tira->setBrightness(80); tira->fill(tira->Color(80, 140, 255));
+        digitalWrite(pinVibrador, LOW);
+      } else if (sonido < 1200) {
+        tira->setBrightness(75); tira->fill(tira->Color(70, 120, 240));
+        digitalWrite(pinVibrador, LOW);
+      } else if (sonido < 1300) {
+        tira->setBrightness(70); tira->fill(tira->Color(60, 100, 220));
+        digitalWrite(pinVibrador, LOW);
+      } else if (sonido < 1400) {
+        // Ruido moderado
+        tira->setBrightness(68); tira->fill(tira->Color(50, 80, 210));
+        digitalWrite(pinVibrador, LOW);
+      } else if (sonido < 1500) {
+        tira->setBrightness(65); tira->fill(tira->Color(80, 60, 200));
+        digitalWrite(pinVibrador, LOW);
+      } else if (sonido < 1600) {
+        // Ruido alto
+        tira->setBrightness(60); tira->fill(tira->Color(100, 40, 185));
+        digitalWrite(pinVibrador, LOW);
+      } else if (sonido < 1700) {
+        // Super alto
+        tira->setBrightness(55); tira->fill(tira->Color(130, 20, 160));
+        digitalWrite(pinVibrador, LOW);
+      } else if (sonido < 1800) {
+        tira->setBrightness(50); tira->fill(tira->Color(160, 10, 130));
+        digitalWrite(pinVibrador, LOW);
+      } else if (sonido < 1900) {
+        tira->setBrightness(45); tira->fill(tira->Color(190, 5, 100));
         digitalWrite(pinVibrador, HIGH);
-      } else if (sonido > 1300) {
-        tira->setBrightness(60);
-        tira->fill(tira->Color(100, 50, 150));
-        digitalWrite(pinVibrador, LOW);
-      } else if (sonido > 1000) {
-        tira->setBrightness(70);
-        tira->fill(tira->Color(100, 100, 200));
-        digitalWrite(pinVibrador, LOW);
+      } else if (sonido < 2000) {
+        tira->setBrightness(40); tira->fill(tira->Color(210, 0, 80));
+        digitalWrite(pinVibrador, HIGH);
+      } else if (sonido < 2100) {
+        tira->setBrightness(35); tira->fill(tira->Color(230, 0, 60));
+        digitalWrite(pinVibrador, HIGH);
+      } else if (sonido < 2200) {
+        tira->setBrightness(30); tira->fill(tira->Color(245, 0, 40));
+        digitalWrite(pinVibrador, HIGH);
       } else {
-        tira->setBrightness(80);
-        tira->fill(tira->Color(100, 150, 255));
-        digitalWrite(pinVibrador, LOW);
+        // > 2200: máximo
+        tira->setBrightness(25); tira->fill(tira->Color(255, 0, 20));
+        digitalWrite(pinVibrador, HIGH);
       }
       tira->show();
     }
@@ -109,8 +137,101 @@ class ModoPresencia : public Modo {
     }
 };
 
+// ===================== MODO 4: FOCUS =====================
+class ModoFocus : public Modo {
+  private:
+    int estado; // 0=FOCUSING, 1=BREAK, 2=IDLE
+    unsigned long tiempoBreak;
+    bool vibrandoBreak;
+    unsigned long tiempoParpadeo;
+    bool luzEncendida;
+
+  public:
+    ModoFocus(Adafruit_NeoPixel* strip, int vibPin) : Modo(strip, vibPin) {
+      estado = 2;
+      tiempoBreak = 0;
+      vibrandoBreak = false;
+      tiempoParpadeo = 0;
+      luzEncendida = true;
+    }
+
+    void setEstado(int e) {
+      estado = e;
+      if (e == 1) {
+        tiempoBreak = millis();
+        vibrandoBreak = true;
+      } else {
+        vibrandoBreak = false;
+        digitalWrite(pinVibrador, LOW);
+      }
+    }
+
+    void ejecutar(int luz, int sonido, int pir) override {
+      if (estado == 2) {
+        if (millis() - tiempoParpadeo >= 600) {
+          tiempoParpadeo = millis();
+          luzEncendida = !luzEncendida;
+        }
+        tira->setBrightness(luzEncendida ? 80 : 0);
+        tira->fill(tira->Color(255, 120, 20));
+        tira->show();
+        digitalWrite(pinVibrador, LOW);
+      } else {
+        tira->setBrightness(80);
+        tira->fill(tira->Color(255, 120, 20));
+        tira->show();
+
+        if (vibrandoBreak) {
+          if (millis() - tiempoBreak < 3000) {
+            digitalWrite(pinVibrador, HIGH);
+          } else {
+            digitalWrite(pinVibrador, LOW);
+            vibrandoBreak = false;
+          }
+        } else {
+          digitalWrite(pinVibrador, LOW);
+        }
+      }
+    }
+
+    String getNombre() override {
+      return "Focus";
+    }
+};
+
+// ===================== MODO 5: CUSTOM =====================
+class ModoCustom : public Modo {
+  private:
+    uint8_t r, g, b, brillo;
+
+  public:
+    ModoCustom(Adafruit_NeoPixel* strip, int vibPin) : Modo(strip, vibPin) {
+      r = 252; g = 216; b = 115; // amarillo por defecto (color de la app)
+      brillo = 80;
+    }
+
+    void setColor(uint8_t nr, uint8_t ng, uint8_t nb) {
+      r = nr; g = ng; b = nb;
+    }
+
+    void setBrillo(uint8_t val) {
+      brillo = val;
+    }
+
+    void ejecutar(int luz, int sonido, int pir) override {
+      tira->setBrightness(brillo);
+      tira->fill(tira->Color(r, g, b));
+      tira->show();
+      digitalWrite(pinVibrador, LOW);
+    }
+
+    String getNombre() override {
+      return "Custom";
+    }
+};
+
 // ===================== VARIABLES GLOBALES =====================
-Modo* modos[3];
+Modo* modos[5];
 int modoActualIndex = 0;
 bool botonPresionadoAntes = false;
 
@@ -142,11 +263,11 @@ void handleRoot() {
   server.send(200, "text/html", html);
 }
 
-// GET /modo?valor=0|1|2  -> cambia el modo activo
+// GET /modo?valor=0|1|2|3|4  -> cambia el modo activo
 void handleSetModo() {
   if (server.hasArg("valor")) {
     int valor = server.arg("valor").toInt();
-    if (valor >= 0 && valor < 3) {
+    if (valor >= 0 && valor < 5) {
       modoActualIndex = valor;
       Serial.print("Modo cambiado desde web a: ");
       Serial.println(modos[modoActualIndex]->getNombre());
@@ -154,7 +275,48 @@ void handleSetModo() {
       return;
     }
   }
-  server.send(400, "text/plain", "Error: parametro 'valor' invalido (usar 0, 1 o 2)");
+  server.send(400, "text/plain", "Error: parametro 'valor' invalido (usar 0-4)");
+}
+
+// GET /color?r=&g=&b=  -> setea color del ModoCustom
+void handleSetColor() {
+  if (server.hasArg("r") && server.hasArg("g") && server.hasArg("b")) {
+    uint8_t r = server.arg("r").toInt();
+    uint8_t g = server.arg("g").toInt();
+    uint8_t b = server.arg("b").toInt();
+    ((ModoCustom*)modos[4])->setColor(r, g, b);
+    Serial.printf("Color: %d,%d,%d\n", r, g, b);
+    server.send(200, "text/plain", "OK");
+    return;
+  }
+  server.send(400, "text/plain", "Error: faltan parametros r, g, b");
+}
+
+// GET /brillo?valor=  -> setea brillo del ModoCustom (0-255)
+void handleSetBrillo() {
+  if (server.hasArg("valor")) {
+    uint8_t val = server.arg("valor").toInt();
+    ((ModoCustom*)modos[4])->setBrillo(val);
+    Serial.printf("Brillo: %d\n", val);
+    server.send(200, "text/plain", "OK");
+    return;
+  }
+  server.send(400, "text/plain", "Error: falta parametro valor");
+}
+
+// GET /focus?estado=0|1|2  -> cambia el estado interno del ModoFocus
+void handleSetFocusEstado() {
+  if (server.hasArg("estado")) {
+    int e = server.arg("estado").toInt();
+    if (e >= 0 && e <= 2) {
+      ((ModoFocus*)modos[3])->setEstado(e);
+      Serial.print("Focus estado: ");
+      Serial.println(e);
+      server.send(200, "text/plain", "OK");
+      return;
+    }
+  }
+  server.send(400, "text/plain", "Error: parametro 'estado' invalido (usar 0, 1 o 2)");
 }
 
 // GET /estado  -> devuelve JSON con los datos actuales (para que la pagina los muestre)
@@ -187,6 +349,8 @@ void setup() {
   modos[0] = new ModoTranquilo(&strip, VIBRADOR_PIN);
   modos[1] = new ModoSobrecarga(&strip, VIBRADOR_PIN);
   modos[2] = new ModoPresencia(&strip, VIBRADOR_PIN);
+  modos[3] = new ModoFocus(&strip, VIBRADOR_PIN);
+  modos[4] = new ModoCustom(&strip, VIBRADOR_PIN);
   
   // ---- Conexión WiFi ----
   WiFi.begin(ssid, password);
@@ -206,6 +370,9 @@ void setup() {
   // ---- Endpoints ----
   server.on("/", handleRoot);
   server.on("/modo", handleSetModo);
+  server.on("/focus", handleSetFocusEstado);
+  server.on("/color", handleSetColor);
+  server.on("/brillo", handleSetBrillo);
   server.on("/estado", handleEstado);
   server.begin();
   Serial.println("Servidor iniciado");
