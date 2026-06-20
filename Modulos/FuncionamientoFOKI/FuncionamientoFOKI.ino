@@ -97,9 +97,27 @@ class ModoSobrecarga : public Modo {
       } else if (sonido < 2200) {
         tira->setBrightness(30); tira->fill(tira->Color(245, 0, 40));
         digitalWrite(pinVibrador, HIGH);
-      } else {
-        // > 2200: máximo
+      } else if (sonido < 2300) {
         tira->setBrightness(25); tira->fill(tira->Color(255, 0, 20));
+        digitalWrite(pinVibrador, HIGH);
+      } else if (sonido < 2400) {
+        tira->setBrightness(23); tira->fill(tira->Color(255, 0, 10));
+        digitalWrite(pinVibrador, HIGH);
+      } else if (sonido < 2500) {
+        tira->setBrightness(20); tira->fill(tira->Color(255, 0, 5));
+        digitalWrite(pinVibrador, HIGH);
+      } else if (sonido < 2600) {
+        tira->setBrightness(17); tira->fill(tira->Color(255, 0, 0));
+        digitalWrite(pinVibrador, HIGH);
+      } else if (sonido < 2700) {
+        tira->setBrightness(14); tira->fill(tira->Color(255, 0, 0));
+        digitalWrite(pinVibrador, HIGH);
+      } else if (sonido < 2800) {
+        tira->setBrightness(11); tira->fill(tira->Color(255, 0, 0));
+        digitalWrite(pinVibrador, HIGH);
+      } else {
+        // > 2800: límite máximo
+        tira->setBrightness(8); tira->fill(tira->Color(255, 0, 0));
         digitalWrite(pinVibrador, HIGH);
       }
       tira->show();
@@ -112,26 +130,67 @@ class ModoSobrecarga : public Modo {
 
 // ===================== MODO 3: PRESENCIA =====================
 class ModoPresencia : public Modo {
+  private:
+    int brilloActual;
+    unsigned long tiempoUltimoPaso;
+    unsigned long tiempoPausaArriba;
+    bool fadiendo;
+    bool subiendo;
+    bool pausandoArriba;
+
   public:
-    ModoPresencia(Adafruit_NeoPixel* strip, int vibPin) : Modo(strip, vibPin) {}
-    
+    ModoPresencia(Adafruit_NeoPixel* strip, int vibPin) : Modo(strip, vibPin) {
+      brilloActual = 0;
+      tiempoUltimoPaso = 0;
+      tiempoPausaArriba = 0;
+      fadiendo = false;
+      subiendo = true;
+      pausandoArriba = false;
+    }
+
     void ejecutar(int luz, int sonido, int pir) override {
       if (pir == HIGH) {
-        for (int b = 0; b <= 150; b += 10) {
-          tira->setBrightness(b);
-          tira->fill(tira->Color(255, 130, 60));
-          tira->show();
-          delay(20);
+        if (!fadiendo) {
+          fadiendo = true;
+          brilloActual = 0;
+          subiendo = true;
+          pausandoArriba = false;
         }
+        if (pausandoArriba) {
+          if (millis() - tiempoPausaArriba >= 500) {
+            pausandoArriba = false;
+            subiendo = false;
+          }
+        } else if (millis() - tiempoUltimoPaso >= 60) {
+          tiempoUltimoPaso = millis();
+          if (subiendo) {
+            brilloActual += 5;
+            if (brilloActual >= 150) {
+              brilloActual = 150;
+              pausandoArriba = true;
+              tiempoPausaArriba = millis();
+            }
+          } else {
+            brilloActual -= 7;
+            if (brilloActual <= 10) { brilloActual = 10; subiendo = true; }
+          }
+        }
+        tira->setBrightness(brilloActual);
+        tira->fill(tira->Color(255, 130, 60));
+        tira->show();
         digitalWrite(pinVibrador, HIGH);
       } else {
-        tira->setBrightness(20);
+        fadiendo = false;
+        brilloActual = 0;
+        subiendo = true;
+        pausandoArriba = false;
+        tira->setBrightness(10);
         tira->fill(tira->Color(40, 20, 10));
         tira->show();
         digitalWrite(pinVibrador, LOW);
       }
     }
-    
+
     String getNombre() override {
       return "Presencia";
     }
